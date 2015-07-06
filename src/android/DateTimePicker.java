@@ -4,9 +4,11 @@ import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Locale;
 
-import org.apache.cordova.api.CallbackContext;
-import org.apache.cordova.api.CordovaPlugin;
-import org.apache.cordova.api.PluginResult;
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaInterface;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,8 +29,17 @@ public class DateTimePicker extends CordovaPlugin {
 	private static final String ACTION_TIME = "time";
 	private final String pluginName = "DateTimePicker";
 
+	private Activity _activity;
+	
 	@Override
-	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
+    public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+        super.initialize(cordova, webView);
+        
+        _activity = cordova.getActivity();        
+    } 
+	
+	@Override
+	public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
 		Log.d(pluginName, "DateTimePicker called with options: " + args);
 
 		if (action.equals("show"))
