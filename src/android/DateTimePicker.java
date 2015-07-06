@@ -19,17 +19,17 @@ import android.util.Log;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
-public class DatePickerPlugin extends CordovaPlugin {
+public class DateTimePicker extends CordovaPlugin {
 
 
 	private static final String ACTION_DATE = "date";
 	private static final String ACTION_CALENDAR = "calendar";
 	private static final String ACTION_TIME = "time";
-	private final String pluginName = "DatePickerPlugin";
+	private final String pluginName = "DateTimePicker";
 
 	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
-		Log.d(pluginName, "DatePicker called with options: " + args);
+		Log.d(pluginName, "DateTimePicker called with options: " + args);
 
 		if (action.equals("show"))
 			return show(args, callbackContext);
@@ -40,7 +40,7 @@ public class DatePickerPlugin extends CordovaPlugin {
 		final Calendar c = Calendar.getInstance();
 		final Runnable runnable;
 		final Context currentCtx = cordova.getActivity();
-		final DatePickerPlugin datePickerPlugin = this;
+		final DateTimePicker datePickerPlugin = this;
 
 
 		String action = "date";
@@ -149,10 +149,10 @@ public class DatePickerPlugin extends CordovaPlugin {
 
 	private final class DateSetListener implements OnDateSetListener {
 		@SuppressWarnings("unused")
-		private final DatePickerPlugin datePickerPlugin;
+		private final DateTimePicker datePickerPlugin;
 		private final CallbackContext callbackContext;
 
-		private DateSetListener(DatePickerPlugin datePickerPlugin, CallbackContext callbackContext) {
+		private DateSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext) {
 			this.datePickerPlugin = datePickerPlugin;
 			this.callbackContext = callbackContext;
 		}
@@ -177,10 +177,10 @@ public class DatePickerPlugin extends CordovaPlugin {
 
 	private final class TimeSetListener implements OnTimeSetListener {
 		@SuppressWarnings("unused")
-		private final DatePickerPlugin datePickerPlugin;
+		private final DateTimePicker datePickerPlugin;
 		private final CallbackContext callbackContext;
 
-		private TimeSetListener(DatePickerPlugin datePickerPlugin, CallbackContext callbackContext) {
+		private TimeSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext) {
 			this.datePickerPlugin = datePickerPlugin;
 			this.callbackContext = callbackContext;
 		}
