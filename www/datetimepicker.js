@@ -37,12 +37,41 @@ function DateTimePicker() {
  *
  * @param {Function} successCallback The function to call when the datetime has changed.
  */
-DateTimePicker.prototype.show = function(successCallback) {
+DateTimePicker.prototype.show = function(options, successCallback, errorCallback) {
 	function onPluginError(err) {
-		console.error("DatePickerPlugin: " + err);
+		if (errorCallback)
+			errorCallback(err);
+		else
+			console.error("DatePickerPlugin: " + err);
+	};
+	
+	function onPluginSuccess(dateInTicks) {
+		if (successCallback) successCallback(new Date(dateInTicks * 1));
+	};
+	
+	var settings = {
+		mode: "date",
+		date: new Date(),
+		allowOldDates: true,
+		allowFutureDates: true,
+		minuteInterval: 1,
+		locale: "NL"
+	};
+
+	// Copy options into settings overwriting the defaults.
+	for (var key in settings) {
+		if (typeof options[key] !== "undefined")
+			settings[key] = options[key];
 	}
 	
-    exec(successCallback, onPluginError, "DateTimePicker", "show", []);
+	// Check if date is valid.
+	var isValidDate = Object.prototype.toString.call(settings.date) === "[object Date]" && !isNaN(settings.date.getTime());
+	if (!isValidDate) {
+		onPluginError("The date " + settings.date + "is invalid.");
+		return;
+	}
+	
+    exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [settings]);
 };
 
 module.exports = new DateTimePicker();

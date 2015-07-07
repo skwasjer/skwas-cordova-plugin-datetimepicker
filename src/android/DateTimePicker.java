@@ -1,8 +1,16 @@
 package com.skwas.cordova.datetimepicker;
 
 import java.lang.reflect.Method;
+import java.lang.IndexOutOfBoundsException;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -13,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.TimePickerDialog.OnTimeSetListener;
@@ -42,68 +51,83 @@ public class DateTimePicker extends CordovaPlugin {
 	public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
 		Log.d(pluginName, "DateTimePicker called with options: " + args);
 
-		if (action.equals("show"))
-			return show(args, callbackContext);
+		if (action.equals("show")) {
+			show(args, callbackContext);
+			return true;
+		}
 		return false;
 	}
 
 	public synchronized boolean show(final JSONArray data, final CallbackContext callbackContext) {
-		final Calendar c = Calendar.getInstance();
+		Calendar c = GregorianCalendar.getInstance();
 		final Runnable runnable;
 		final Context currentCtx = cordova.getActivity();
 		final DateTimePicker datePickerPlugin = this;
 
-
+		int minuteInterval = 1;
 		String action = "date";
 
-
-		/*
-		 * Parse information from data parameter and where possible, override
-		 * above date fields
-		 */
-		int month = -1, day = -1, year = -1, hour = -1, min = -1;
-		int minuteInterval = 1;
-		try {
-			JSONObject obj = data.getJSONObject(0);
-			action = obj.getString("mode");
-
-			String sMinuteInterval = obj.getString("minuteInterval");
-			if (sMinuteInterval != null && sMinuteInterval != "")
-				minuteInterval = Integer.parseInt(sMinuteInterval);
-
-			String optionDate = obj.getString("date");
-
-			String[] datePart = optionDate.split("/");
-			month = Integer.parseInt(datePart[0]);
-			day = Integer.parseInt(datePart[1]);
-			year = Integer.parseInt(datePart[2]);
-			hour = Integer.parseInt(datePart[3]);
-			min = Integer.parseInt(datePart[4]);
-
-
-			/* currently not handled in Android */
-			// boolean optionAllowOldDates = obj.getBoolean("allowOldDates");
-
-		} catch (JSONException e) {
-			e.printStackTrace();
+		// Parse information from data parameter.
+		if (data.length() == 1) {
+			JSONObject obj = null;
+			try {
+				obj = data.getJSONObject(0);
+				
+				// Get mode.
+				action = obj.getString("mode");
+	
+				// Get interval for time picker.
+				String sMinuteInterval = obj.getString("minuteInterval");
+				if (sMinuteInterval != null && sMinuteInterval != "")
+					minuteInterval = Integer.parseInt(sMinuteInterval);
+	
+				// Get date/time.
+				String date = obj.getString("date");
+				if (date != null && date != "") {
+					try {
+						// Attempt to parse with ISO 8601.
+						c = ISO8601.toCalendar(date);
+					}
+					catch (ParseException ex) {
+						// If failed, try again using MS JSON date format (returns null if not succesful).
+						c = MicrosoftJSONDate.toCalendar(date);
+						if (c == null) {
+							callbackContext.error("Failed to parse date/time: " + date);
+							return false;
+						}
+					}
+				}
+	
+				// Currently not handled in Android...
+				// boolean optionAllowOldDates = obj.getBoolean("allowOldDates");
+			}
+			catch (JSONException ex) {
+//				ex.printStackTrace();
+				if (obj == null)
+					callbackContext.error("Failed to load JSON options." + ex.getMessage());
+				else
+					callbackContext.error("Invalid property in JSON options: " + obj.toString());
+				return false;
+			}
 		}
 
 
-		// By default initalize these fields to 'now'
-		final int mYear = year == -1 ? c.get(Calendar.YEAR) : year;
-		final int mMonth = month == -1 ? c.get(Calendar.MONTH) : month - 1;
-		final int mDay = day == -1 ? c.get(Calendar.DAY_OF_MONTH) : day;
-		final int mHour = hour == -1 ? c.get(Calendar.HOUR_OF_DAY) : hour;
-		final int mMinutes = min == -1 ? c.get(Calendar.MINUTE) : min;
+		// Get final values.
+		final int mYear = c.get(Calendar.YEAR);
+		final int mMonth = c.get(Calendar.MONTH);
+		final int mDay = c.get(Calendar.DAY_OF_MONTH);
+		final int mHour = c.get(Calendar.HOUR_OF_DAY);
+		final int mMinutes = c.get(Calendar.MINUTE);
 		final int mMinuteInterval = minuteInterval;
 		final String sAction = action;
+		final Calendar fCalendar = c;
 
 
 		if (ACTION_TIME.equalsIgnoreCase(action)) {
 			runnable = new Runnable() {
 				@Override
 				public void run() {
-					final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext);
+					final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext, fCalendar);
 					final DurationTimePickerDialog timeDialog = new DurationTimePickerDialog(
 							currentCtx, timeSetListener, mHour, mMinutes, true, mMinuteInterval);
 
@@ -115,11 +139,12 @@ public class DateTimePicker extends CordovaPlugin {
 			};
 
 
-		} else if (ACTION_DATE.equalsIgnoreCase(action) || ACTION_CALENDAR.equalsIgnoreCase(action)) {
+		} 
+		else if (ACTION_DATE.equalsIgnoreCase(action) || ACTION_CALENDAR.equalsIgnoreCase(action)) {
 			runnable = new Runnable() {
 				@Override
 				public void run() {
-					final DateSetListener dateSetListener = new DateSetListener(datePickerPlugin, callbackContext);
+					final DateSetListener dateSetListener = new DateSetListener(datePickerPlugin, callbackContext, fCalendar);
 					final DatePickerDialog dateDialog = new DatePickerDialog(
 							currentCtx, dateSetListener, mYear, mMonth, mDay);
 
@@ -137,8 +162,8 @@ public class DateTimePicker extends CordovaPlugin {
 							Method setSpinnersShown = DatePicker.class.getMethod("setSpinnersShown", boolean.class);
 							setSpinnersShown.invoke(dp, false);
 						}
-						catch (Exception e) {
-							e.printStackTrace();
+						catch (Exception ex) {
+							//ex.printStackTrace();
 						}
 					}
 
@@ -147,8 +172,9 @@ public class DateTimePicker extends CordovaPlugin {
 			};
 
 
-		} else {
-			Log.d(pluginName, "Unknown action. Only 'date' or 'time' are valid actions");
+		}
+		else {
+			callbackContext.error("Unknown action. Only 'date' or 'time' are valid actions");
 			return false;
 		}
 
@@ -162,10 +188,12 @@ public class DateTimePicker extends CordovaPlugin {
 		@SuppressWarnings("unused")
 		private final DateTimePicker datePickerPlugin;
 		private final CallbackContext callbackContext;
+		private final Calendar calendar;
 
-		private DateSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext) {
+		private DateSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext, Calendar calendar) {
 			this.datePickerPlugin = datePickerPlugin;
 			this.callbackContext = callbackContext;
+			this.calendar = calendar;
 		}
 
 
@@ -174,15 +202,18 @@ public class DateTimePicker extends CordovaPlugin {
 		 */
 		@Override
 		public void onDateSet(final DatePicker view, final int year, final int monthOfYear, final int dayOfMonth) {
-			String returnDate = String.format(new Locale("en"), "%02d/%02d/%02d",
-					year,
-					monthOfYear + 1,
-					dayOfMonth
-					);
-
-			PluginResult res = new PluginResult(PluginResult.Status.OK, returnDate);
-			res.setKeepCallback(false);
-			callbackContext.sendPluginResult(res);
+			calendar.set(Calendar.YEAR, year);
+			calendar.set(Calendar.MONTH, monthOfYear);
+			calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+	
+			Date date = calendar.getTime();
+			Long millis = Long.valueOf(date.getTime());
+			try {
+				callbackContext.success(JSONObject.numberToString(millis));
+			}
+			catch (JSONException ex) {
+				callbackContext.error("Failed to get date.");
+			}
 		}
 	}
 
@@ -190,10 +221,12 @@ public class DateTimePicker extends CordovaPlugin {
 		@SuppressWarnings("unused")
 		private final DateTimePicker datePickerPlugin;
 		private final CallbackContext callbackContext;
+		private final Calendar calendar;
 
-		private TimeSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext) {
+		private TimeSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext, Calendar calendar) {
 			this.datePickerPlugin = datePickerPlugin;
 			this.callbackContext = callbackContext;
+			this.calendar = calendar;
 		}
 
 
@@ -203,24 +236,72 @@ public class DateTimePicker extends CordovaPlugin {
 		 */
 		@Override
 		public void onTimeSet(final TimePicker view, final int hourOfDay, final int minute) {
-			Calendar c = Calendar.getInstance();
-			c.set(Calendar.HOUR_OF_DAY, hourOfDay);
-			c.set(Calendar.MINUTE, minute);
-			c.set(Calendar.MILLISECOND, 0);
-
-			String returnDate = String.format(new Locale("en"), "%02d/%02d/%02d %02d:%02d",
-					c.get(Calendar.YEAR),
-					c.get(Calendar.MONTH) + 1,
-					c.get(Calendar.DAY_OF_MONTH),
-					c.get(Calendar.HOUR_OF_DAY),
-					c.get(Calendar.MINUTE)
-					);
-
-			PluginResult res = new PluginResult(PluginResult.Status.OK, returnDate);
-			res.setKeepCallback(false);
-			callbackContext.sendPluginResult(res);
+			calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+			calendar.set(Calendar.MINUTE, minute);
+			calendar.set(Calendar.SECOND, 0);
+			calendar.set(Calendar.MILLISECOND, 0);
+			
+			Date date = calendar.getTime();
+			Long millis = Long.valueOf(date.getTime());
+			try {
+				callbackContext.success(JSONObject.numberToString(millis));
+			}
+			catch (JSONException ex) {
+				callbackContext.error("Failed to get time.");
+			}
 		}
 	}
+	
+	private static class MicrosoftJSONDate {
+		
+		public static Calendar toCalendar(final String jsonDate) {
+			Pattern regex = Pattern.compile("/?Date\\((\\d+)(([+-]?)(\\d{2})(\\d{2}))?\\)/");
+			Matcher match = regex.matcher(jsonDate);
+			if (match.find()) {
+				Long ticks = Long.valueOf(match.group(1));
+				// TODO: implement UTC offset from groups 3, 4, 5 (+, HH, mm)
+				Calendar calendar = GregorianCalendar.getInstance();
+				calendar.setTime(new Date(ticks.longValue()));
+				return calendar;
+			}
+			return null;
+		}		
+	}
+	
+	// http://stackoverflow.com/questions/2201925/converting-iso-8601-compliant-string-to-java-util-date
+	/**
+	 * Helper class for handling a most common subset of ISO 8601 strings
+	 * (in the following format: "2008-03-01T13:00:00+01:00"). It supports
+	 * parsing the "Z" timezone, but many other less-used features are
+	 * missing.
+	 */
+	private static class ISO8601 {
+	    /** Transform Calendar to ISO 8601 string. */
+	    public static String fromCalendar(final Calendar calendar) {
+	        Date date = calendar.getTime();
+	        String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+	            .format(date);
+	        return formatted.substring(0, 22) + ":" + formatted.substring(22);
+	    }
 
+	    /** Get current date and time formatted as ISO 8601 string. */
+	    public static String now() {
+	        return fromCalendar(GregorianCalendar.getInstance());
+	    }
 
+	    /** Transform ISO 8601 string to Calendar. */
+	    public static Calendar toCalendar(final String iso8601string)
+	            throws ParseException {
+	        Calendar calendar = GregorianCalendar.getInstance();
+	        String s = iso8601string.replace("Z", "+00:00");
+	        try {
+	            s = s.substring(0, 22) + s.substring(23);  // to get rid of the ":"
+	        } catch (IndexOutOfBoundsException e) {
+	            throw new ParseException("Invalid length", 0);
+	        }
+	        Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(s);
+	        calendar.setTime(date);
+	        return calendar;
+	    }
+	}
 }
