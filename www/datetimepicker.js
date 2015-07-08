@@ -46,6 +46,13 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 	};
 	
 	function onPluginSuccess(result) {
+		// The plugin expects the result to be either: 
+		// - a 64-bit int (ticks)
+		// - a string representing ticks (will be converted to int)
+		// - an object with either:
+		//     - "ticks": a 64-bit int (ticks)
+		//     - "date": an ISO 8601 datetime (depends on browser support however if it can be parsed).
+		
 		if (typeof result !== "undefined" && result != null) {
 			var dateInTicks;
 			if (typeof result === "object") {
@@ -95,6 +102,9 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		onPluginError("The date " + settings.date + "is invalid.");
 		return;
 	}
+	
+	// Set the date to the ticks. The plugin expects the date as 64-bit int.
+	settings.date = settings.date.valueOf();
 	
     exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [settings]);
 };

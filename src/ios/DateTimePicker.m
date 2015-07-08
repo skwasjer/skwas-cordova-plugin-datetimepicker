@@ -76,32 +76,34 @@
 {
     if (isVisible) return;
     
-    NSMutableDictionary *optionsOrNil = [command.arguments objectAtIndex:command.arguments.count - 1];
-    
-    _callbackId = command.callbackId;
-    
-    if (self.datePickerSheet != nil) {
-        UIView *webView = super.webView;
+    [self.commandDelegate runInBackground:^{
+        NSMutableDictionary *optionsOrNil = [command.arguments objectAtIndex:command.arguments.count - 1];
         
-        [self configureDatePicker:optionsOrNil datePicker:self.datePicker];
-        [self.datePickerSheet showInView:webView.superview];
+        _callbackId = command.callbackId;
         
-        CGSize frameSize = webView.frame.size;
-        BOOL isPortrait = UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]);
-        if (!isPortrait) {
-            frameSize.height = frameSize.width;
-            frameSize.width = webView.frame.size.height;
+        if (self.datePickerSheet != nil) {
+            UIView *webView = super.webView;
+            
+            [self configureDatePicker:optionsOrNil datePicker:self.datePicker];
+            [self.datePickerSheet showInView:webView.superview];
+            
+            CGSize frameSize = webView.frame.size;
+            BOOL isPortrait = UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]);
+            if (!isPortrait) {
+                frameSize.height = frameSize.width;
+                frameSize.width = webView.frame.size.height;
+            }
+            
+            [self.datePickerSheet setBounds:CGRectMake(0, 0, frameSize.width, frameSize.height + 30)];
+        } else {
+            [self configureDatePicker:optionsOrNil datePicker:_modalPicker.datePicker];
+            
+            // Present the view with our custom transition.
+            _modalPicker.transitioningDelegate = self;
+            _modalPicker.modalPresentationStyle = UIModalPresentationCustom;
+            [self.viewController presentViewController:_modalPicker animated:YES completion:nil];
         }
-        
-        [self.datePickerSheet setBounds:CGRectMake(0, 0, frameSize.width, frameSize.height + 30)];
-    } else {
-        [self configureDatePicker:optionsOrNil datePicker:_modalPicker.datePicker];
-        
-        // Present the view with our custom transition.
-        _modalPicker.transitioningDelegate = self;
-        _modalPicker.modalPresentationStyle = UIModalPresentationCustom;
-        [self.viewController presentViewController:_modalPicker animated:YES completion:nil];
-    }
+    }];
     
     isVisible = YES;
 }
@@ -255,7 +257,7 @@
 - (void)configureDatePicker:(NSMutableDictionary *)optionsOrNil datePicker:(UIDatePicker *)datePicker;
 {
     NSString *mode = [optionsOrNil objectForKey:@"mode"];
-    NSString *dateString = [optionsOrNil objectForKey:@"date"];
+    long long ticks = [[optionsOrNil objectForKey:@"date"] longLongValue];
     NSString *localeString = [optionsOrNil objectForKey:@"locale"];
     NSString *okTextString = [optionsOrNil objectForKey:@"okText"];
     NSString *cancelTextString = [optionsOrNil objectForKey:@"cancelText"];
@@ -291,7 +293,8 @@
     
     // Lastly, set to something else first, to force an update.
     datePicker.date = [NSDate dateWithTimeIntervalSince1970:0];
-    datePicker.date = [self getRoundedDate:[self.isoDateFormatter dateFromString:dateString]  minuteInterval:minuteInterval];
+   // datePicker.date = [self getRoundedDate:[self.isoDateFormatter dateFromString:dateString]  minuteInterval:minuteInterval];
+    datePicker.date = [self getRoundedDate:[[NSDate alloc] initWithTimeIntervalSince1970:(ticks / 1000)] minuteInterval:minuteInterval];
 }
 
 // Sends the date to the plugin javascript handler.
