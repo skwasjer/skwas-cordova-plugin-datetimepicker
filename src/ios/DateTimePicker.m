@@ -40,6 +40,7 @@
 
 @synthesize datePickerSheet = _datePickerSheet;
 @synthesize datePicker = _datePicker;
+@synthesize datePickerCloseButton = _datePickerCloseButton;
 @synthesize isoDateFormatter = _isoDateFormatter;
 @synthesize modalPicker = _modalPicker;
 
@@ -60,9 +61,9 @@
         if (lessThenIOS7) {
             self.datePicker = [self createDatePicker:CGRectMake(0, 40, 0, 0)];
             
-            UISegmentedControl *datePickerCloseButton = [self createCloseButton:@"Selecteren" target:self action:@selector(dismissPicker:)];
+            _datePickerCloseButton = [self createCloseButton:@"" target:self action:@selector(dismissPicker:)];
             
-            [self initActionSheet:self datePicker:self.datePicker closeButton:datePickerCloseButton];
+            [self initActionSheet:self datePicker:self.datePicker closeButton:_datePickerCloseButton];
         } else {
             [self initPickerView:theWebView.superview];
         }
@@ -159,8 +160,8 @@
     ModalPickerViewController *picker = [[ModalPickerViewController alloc]
                                          initWithPickerType:ModalPickerTypeDate
                                          headerText:@""
-                                         dismissText:@"Selecteer"
-                                         cancelText:@"Annuleren"
+                                         dismissText:@""
+                                         cancelText:@""
                                          parent:theWebView];
     
     __weak ModalPickerViewController *weakPicker = picker;
@@ -256,13 +257,26 @@
     NSString *mode = [optionsOrNil objectForKey:@"mode"];
     NSString *dateString = [optionsOrNil objectForKey:@"date"];
     NSString *localeString = [optionsOrNil objectForKey:@"locale"];
+    NSString *okTextString = [optionsOrNil objectForKey:@"okText"];
+    NSString *cancelTextString = [optionsOrNil objectForKey:@"cancelText"];
     BOOL allowOldDates = [[optionsOrNil objectForKey:@"allowOldDates"] intValue] == 1 ? YES : NO;
     BOOL allowFutureDates = [[optionsOrNil objectForKey:@"allowFutureDates"] intValue] == 1 ? YES : NO;
     NSInteger minuteInterval = [[optionsOrNil objectForKey:@"minuteInterval"] intValue];
     
     if (localeString == nil || localeString.length == 0) localeString = @"EN";
     datePicker.locale = [[NSLocale alloc] initWithLocaleIdentifier:localeString];
-    
+
+    if (okTextString == nil || okTextString.length == 0) okTextString = @"Select";
+    if (cancelTextString == nil || cancelTextString.length == 0) cancelTextString = @"Cancel";
+
+    if (self.modalPicker != nil) {
+        self.modalPicker.dismissText = okTextString;
+        self.modalPicker.cancelText = cancelTextString;
+    }
+    else if (self.datePickerSheet != nil) {
+        [self.datePickerCloseButton setTitle:okTextString forSegmentAtIndex:0];
+    }
+
     if (!allowOldDates) datePicker.minimumDate = [NSDate date];
     if (!allowFutureDates) datePicker.maximumDate = [NSDate date];
     

@@ -55,7 +55,9 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		allowOldDates: true,
 		allowFutureDates: true,
 		minuteInterval: 1,
-		locale: "NL"
+		locale: "EN",
+		okText: "Select",
+		cancelText: "Cancel"
 	};
 
 	// Copy options into settings overwriting the defaults.

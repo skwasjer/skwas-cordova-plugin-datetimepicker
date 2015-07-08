@@ -26,9 +26,9 @@
     
 @property (nonatomic, retain) UIActionSheet* datePickerSheet;
 @property (nonatomic, retain) UIDatePicker* datePicker;
+@property (nonatomic, retain) UISegmentedControl *datePickerCloseButton;
 @property (nonatomic, retain) NSDateFormatter* isoDateFormatter;
 @property (nonatomic, retain) ModalPickerViewController* modalPicker;
-    
 
 //- (void) show:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
 - (void)show:(CDVInvokedUrlCommand*)command;
