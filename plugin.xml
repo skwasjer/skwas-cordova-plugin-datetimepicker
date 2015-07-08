@@ -64,7 +64,7 @@ THE SOFTWARE.
         <source-file src="src/ios/ModalPickerViewController.m" />
         <header-file src="src/ios/TransparentCoverVerticalAnimator.h" />
         <source-file src="src/ios/TransparentCoverVerticalAnimator.m" />
-    </platform-->
+    </platform>
 
     <!-- browser -->
     <platform name="browser">
