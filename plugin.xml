@@ -51,7 +51,7 @@ THE SOFTWARE.
     </platform>
 	
 	<!-- ios -->
-    <!--platform name="ios">
+    <platform name="ios">
         <config-file target="config.xml" parent="/*">
             <feature name="DateTimePicker">
                 <param name="ios-package" value="DateTimePicker"/>
@@ -60,6 +60,10 @@ THE SOFTWARE.
 
         <header-file src="src/ios/DateTimePicker.h" />
         <source-file src="src/ios/DateTimePicker.m" />
+        <header-file src="src/ios/ModalPickerViewController.h" />
+        <source-file src="src/ios/ModalPickerViewController.m" />
+        <header-file src="src/ios/TransparentCoverVerticalAnimator.h" />
+        <source-file src="src/ios/TransparentCoverVerticalAnimator.m" />
     </platform-->
 
     <!-- browser -->

@@ -11,6 +11,7 @@
     ],
     "platforms": [
         "android",
+		"ios",
         "browser"
     ],
     "engines": []
