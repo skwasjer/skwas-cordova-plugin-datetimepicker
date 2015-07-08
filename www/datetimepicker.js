@@ -51,12 +51,19 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 			if (typeof dateInTicks === "string") dateInTicks = dateInTicks * 1;
 		
 			if (typeof dateInTicks === "number") {
-				if (successCallback) successCallback(new Date(dateInTicks * 1));
-				return;
+				var resultDate = new Date(dateInTicks * 1);
+				if (isDate(resultDate) && successCallback) {
+					successCallback();
+					return;
+				}
 			}
 		}
-		throw new Error("DateTimePicker: Unexpected result from plugin: " + JSON.stringify(arguments));
+		onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
 	};
+	
+	function isDate(val) {
+		return Object.prototype.toString.call(val) === "[object Date]" && !isNaN(val.getTime());
+	}
 	
 	var settings = {
 		mode: "date",
@@ -76,8 +83,7 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 	}
 	
 	// Check if date is valid.
-	var isValidDate = Object.prototype.toString.call(settings.date) === "[object Date]" && !isNaN(settings.date.getTime());
-	if (!isValidDate) {
+	if (!isDate(settings.date)) {
 		onPluginError("The date " + settings.date + "is invalid.");
 		return;
 	}
