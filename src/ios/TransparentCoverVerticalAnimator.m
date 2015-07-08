@@ -117,7 +117,7 @@
 
 - (CGPoint)getEndingPoint:(UIInterfaceOrientation)orientation
 {
-    CGRect screenBounds = [UIScreen mainScreen].bounds;
+    //CGRect screenBounds = [UIScreen mainScreen].bounds;
     CGPoint coordinate = CGPointMake(0, 0);
     switch(orientation)
     {
