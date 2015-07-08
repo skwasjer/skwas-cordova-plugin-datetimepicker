@@ -45,15 +45,23 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 			console.error("DatePickerPlugin: " + err);
 	};
 	
-	function onPluginSuccess(dateInTicks) {
-		if (typeof dateInTicks !== "undefined" && dateInTicks != null) {
-			if (typeof dateInTicks === "object") dateInTicks = dateInTicks.date;
-			if (typeof dateInTicks === "string") dateInTicks = dateInTicks * 1;
+	function onPluginSuccess(result) {
+		if (typeof result !== "undefined" && result != null) {
+			var dateInTicks;
+			if (typeof result === "object") {
+				if (typeof result.ticks == "number")
+					dateInTicks = result.ticks;
+				else
+					dateInTicks = new Date(result.date).valueOf();
+			} else if (typeof result === "string")
+				dateInTicks = result * 1;
+			else
+				dateInTicks = result;
 		
 			if (typeof dateInTicks === "number") {
-				var resultDate = new Date(dateInTicks * 1);
+				var resultDate = new Date(dateInTicks);
 				if (isDate(resultDate) && successCallback) {
-					successCallback();
+					successCallback(resultDate);
 					return;
 				}
 			}

@@ -296,7 +296,11 @@
 
 // Sends the date to the plugin javascript handler.
 - (void)callbackSuccessWithJavascript:(NSDate *)date {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)[date timeIntervalSince1970]];
+    long long ticks = ((long long)(int)[date timeIntervalSince1970]) * 1000;
+    NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
+    [result setObject:[NSNumber numberWithLongLong:ticks] forKey:@"ticks"];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:_callbackId];
 }
 
