@@ -46,7 +46,16 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 	};
 	
 	function onPluginSuccess(dateInTicks) {
-		if (successCallback) successCallback(new Date(dateInTicks * 1));
+		if (typeof dateInTicks !== "undefined" && dateInTicks != null) {
+			if (typeof dateInTicks === "object") dateInTicks = dateInTicks.date;
+			if (typeof dateInTicks === "string") dateInTicks = dateInTicks * 1;
+		
+			if (typeof dateInTicks === "number") {
+				if (successCallback) successCallback(new Date(dateInTicks * 1));
+				return;
+			}
+		}
+		throw new Error("DateTimePicker: Unexpected result from plugin: " + JSON.stringify(arguments));
 	};
 	
 	var settings = {
