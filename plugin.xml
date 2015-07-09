@@ -31,7 +31,7 @@ THE SOFTWARE.
     <name>DateTime picker</name>
     <description>Cordova DateTime picker plugin</description>
     <license>MIT</license>
-    <keywords>cordova,appinfo</keywords>
+    <keywords>cordova,datetime,date,time,datetimepicker,datepicker,timepicker</keywords>
     <repo>https://github.com/skwasjer/cordova-datetimepicker-plugin.git</repo>
 
     <js-module src="www/datetimepicker.js" name="DateTimePicker">
