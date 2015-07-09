@@ -1,8 +1,3 @@
-//        Phonegap DatePicker Plugin
-//        Copyright (c) Greg Allen 2011
-//        MIT Licensed
-
-
 #import <Foundation/Foundation.h>
 #import <Cordova/CDVPlugin.h>
 #import "ModalPickerViewController.h"

@@ -1,10 +1,3 @@
-//        Phonegap DatePicker Plugin
-//        Copyright (c) Greg Allen 2011
-//        MIT Licensed
-//
-//  Additional refactoring by Sam de Freyssinet
-
-
 #import "DateTimePicker.h"
 #import "ModalPickerViewController.h"
 #import "TransparentCoverVerticalAnimator.h"

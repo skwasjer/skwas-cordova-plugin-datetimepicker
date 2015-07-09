@@ -1,11 +1,3 @@
-//
-//  ModalPickerViewController.m
-//  Qlinx
-//
-//  Created by Qlinx Mini on 26/09/14.
-//
-//
-
 #import "ModalPickerViewController.h"
 
 @interface ModalPickerViewController()

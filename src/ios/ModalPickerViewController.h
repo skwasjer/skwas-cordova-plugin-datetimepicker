@@ -1,11 +1,3 @@
-//
-//  ModalPickerViewController.h
-//  Qlinx
-//
-//  Created by Qlinx Mini on 26/09/14.
-//
-//
-
 #import <UIKit/UIKit.h>
 
 typedef enum {
