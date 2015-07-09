@@ -257,7 +257,7 @@
 - (void)configureDatePicker:(NSMutableDictionary *)optionsOrNil datePicker:(UIDatePicker *)datePicker;
 {
     NSString *mode = [optionsOrNil objectForKey:@"mode"];
-    long long ticks = [[optionsOrNil objectForKey:@"date"] longLongValue];
+    long long ticks = [[optionsOrNil objectForKey:@"ticks"] longLongValue];
     NSString *localeString = [optionsOrNil objectForKey:@"locale"];
     NSString *okTextString = [optionsOrNil objectForKey:@"okText"];
     NSString *cancelTextString = [optionsOrNil objectForKey:@"cancelText"];

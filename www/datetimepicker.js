@@ -103,8 +103,8 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		return;
 	}
 	
-	// Set the date to the ticks. The plugin expects the date as 64-bit int.
-	settings.date = settings.date.valueOf();
+	// Also set the date in ticks 64-bit int. The iOS-plugin expects the date in ticks, Android just supports ISO 8601 or Microsoft JSON date.
+	settings.ticks = settings.date.valueOf();
 	
     exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [settings]);
 };
