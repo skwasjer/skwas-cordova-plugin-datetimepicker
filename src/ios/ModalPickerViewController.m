@@ -8,14 +8,18 @@
 
 #import "ModalPickerViewController.h"
 
+@interface ModalPickerViewController()
+
+@property (strong) UILabel* headerLabel;
+@property (strong) UIButton *doneButton;
+@property (strong) UIButton *cancelButton;
+@property (strong) UIView *parent;
+@property (strong) UIView *internalView;
+
+@end
 
 @implementation ModalPickerViewController
 
-UILabel *_headerLabel;
-UIButton *_doneButton;
-UIButton *_cancelButton;
-UIView *_parent;
-UIView *_internalView;
 
 ModalPickerType _pickerType;
 

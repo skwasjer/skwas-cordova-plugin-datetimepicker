@@ -9,7 +9,7 @@
 #import "ModalPickerViewController.h"
 #import "TransparentCoverVerticalAnimator.h"
 
-@interface DateTimePicker (Private)
+@interface DateTimePicker() // (Private)
 
 
 // Initialize the UIActionSheet with ID <UIActionSheetDelegate> delegate UIDatePicker datePicker (UISegmentedControl)closeButton
@@ -32,17 +32,21 @@
 - (void)configureDatePicker:(NSMutableDictionary *)optionsOrNil datePicker:(UIDatePicker *)datePicker;
 
 
+@property (readwrite, assign) BOOL isVisible;
+@property (strong) NSString* callbackId;
+
 @end
 
 
 @implementation DateTimePicker
 
 
-@synthesize datePickerSheet = _datePickerSheet;
-@synthesize datePicker = _datePicker;
-@synthesize datePickerCloseButton = _datePickerCloseButton;
-@synthesize isoDateFormatter = _isoDateFormatter;
-@synthesize modalPicker = _modalPicker;
+@synthesize isVisible, callbackId;
+//@synthesize datePickerSheet = _datePickerSheet;
+//@synthesize datePicker = _datePicker;
+//@synthesize datePickerCloseButton = _datePickerCloseButton;
+//@synthesize isoDateFormatter = _isoDateFormatter;
+//@synthesize modalPicker = _modalPicker;
 
 
 #pragma mark - Public Methods
@@ -61,9 +65,9 @@
         if (lessThenIOS7) {
             self.datePicker = [self createDatePicker:CGRectMake(0, 40, 0, 0)];
             
-            _datePickerCloseButton = [self createCloseButton:@"" target:self action:@selector(dismissPicker:)];
+            self.datePickerCloseButton = [self createCloseButton:@"" target:self action:@selector(dismissPicker:)];
             
-            [self initActionSheet:self datePicker:self.datePicker closeButton:_datePickerCloseButton];
+            [self initActionSheet:self datePicker:self.datePicker closeButton:self.datePickerCloseButton];
         } else {
             [self initPickerView:theWebView.superview];
         }
@@ -76,34 +80,30 @@
 {
     if (isVisible) return;
     
-    [self.commandDelegate runInBackground:^{
-        NSMutableDictionary *optionsOrNil = [command.arguments objectAtIndex:command.arguments.count - 1];
+    self.callbackId = command.callbackId;
+    
+    NSMutableDictionary *optionsOrNil = [command.arguments objectAtIndex:command.arguments.count - 1];
         
-        _callbackId = command.callbackId;
-        
-        if (self.datePickerSheet != nil) {
-            UIView *webView = super.webView;
+    if (self.datePickerSheet != nil) {
+        UIView *webView = super.webView;
             
-            [self configureDatePicker:optionsOrNil datePicker:self.datePicker];
-            [self.datePickerSheet showInView:webView.superview];
-            
-            CGSize frameSize = webView.frame.size;
-            BOOL isPortrait = UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]);
-            if (!isPortrait) {
-                frameSize.height = frameSize.width;
-                frameSize.width = webView.frame.size.height;
-            }
-            
-            [self.datePickerSheet setBounds:CGRectMake(0, 0, frameSize.width, frameSize.height + 30)];
-        } else {
-            [self configureDatePicker:optionsOrNil datePicker:_modalPicker.datePicker];
-            
-            // Present the view with our custom transition.
-            _modalPicker.transitioningDelegate = self;
-            _modalPicker.modalPresentationStyle = UIModalPresentationCustom;
-            [self.viewController presentViewController:_modalPicker animated:YES completion:nil];
+        [self configureDatePicker:optionsOrNil datePicker:self.datePicker];
+        [self.datePickerSheet showInView:webView.superview];
+                
+        CGSize frameSize = webView.frame.size;
+        BOOL isPortrait = UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]);
+        if (!isPortrait) {
+            frameSize.height = frameSize.width;
+            frameSize.width = webView.frame.size.height;
         }
-    }];
+            
+        [self.datePickerSheet setBounds:CGRectMake(0, 0, frameSize.width, frameSize.height + 30)];
+    } else {
+        [self configureDatePicker:optionsOrNil datePicker:self.modalPicker.datePicker];
+            
+        // Present the view with our custom transition.
+        [self.viewController presentViewController:self.modalPicker animated:YES completion:nil];
+    }
     
     isVisible = YES;
 }
@@ -166,7 +166,10 @@
                                          cancelText:@""
                                          parent:theWebView];
     
-    __weak ModalPickerViewController *weakPicker = picker;
+    picker.modalPresentationStyle = UIModalPresentationCustom;
+    picker.transitioningDelegate = self;
+
+    __weak ModalPickerViewController* weakPicker = picker;
     
     picker.headerBackgroundColor = [UIColor colorWithRed:0.92f green:0.92f blue:0.92f alpha:0.95f];
     
@@ -304,7 +307,7 @@
     [result setObject:[NSNumber numberWithLongLong:ticks] forKey:@"ticks"];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:_callbackId];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
 
 @end

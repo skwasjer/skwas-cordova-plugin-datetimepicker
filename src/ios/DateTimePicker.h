@@ -13,24 +13,16 @@
 
 
 @interface DateTimePicker : CDVPlugin <UIActionSheetDelegate, UIViewControllerTransitioningDelegate> {
-    UIActionSheet *_datePickerSheet;
-    UIDatePicker *_datePicker;
-    NSDateFormatter *_isoDateFormatter;
-    ModalPickerViewController *_modalPicker;
-    BOOL isVisible;
-    
-//    CDVInvokedUrlCommand *_command;
-    NSString *_callbackId;
+   
 }
     
     
-@property (nonatomic, retain) UIActionSheet* datePickerSheet;
-@property (nonatomic, retain) UIDatePicker* datePicker;
-@property (nonatomic, retain) UISegmentedControl *datePickerCloseButton;
-@property (nonatomic, retain) NSDateFormatter* isoDateFormatter;
-@property (nonatomic, retain) ModalPickerViewController* modalPicker;
+@property (strong) UIActionSheet* datePickerSheet;
+@property (strong) UIDatePicker* datePicker;
+@property (strong) UISegmentedControl *datePickerCloseButton;
+@property (strong) NSDateFormatter* isoDateFormatter;
+@property (strong) ModalPickerViewController* modalPicker;
 
-//- (void) show:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
 - (void)show:(CDVInvokedUrlCommand*)command;
     
 @end
