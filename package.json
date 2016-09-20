@@ -1,10 +1,10 @@
 {
-    "version": "0.4.8",
-    "name": "com.skwas.cordova.datetimepicker",
+    "version": "0.5.0",
+    "name": "skwas-cordova-plugin-datetimepicker",
     "cordova_name": "DateTime picker",
     "description": "Cordova DateTime picker plugin",
     "license": "MIT",
-	"repo": "https://github.com/skwasjer/cordova-datetimepicker-plugin.git",
+	"repo": "https://github.com/skwasjer/skwas-cordova-plugin-datetimepicker.git",
     "keywords": [
         "cordova",
         "datetime"
