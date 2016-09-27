@@ -45,28 +45,20 @@
 #pragma mark - Public Methods
 
 
-- (CDVPlugin *)initWithWebView:(UIWebView *)theWebView
-{
-    self = (DateTimePicker *)[super initWithWebView:theWebView];
+- (void)pluginInitialize {
+    self.isoDateFormatter = [self createISODateFormatter:k_DATEPICKER_DATETIME_FORMAT timezone:[NSTimeZone defaultTimeZone]];
     
-    if (self)
-    {
-        self.isoDateFormatter = [self createISODateFormatter:k_DATEPICKER_DATETIME_FORMAT timezone:[NSTimeZone defaultTimeZone]];
+    BOOL lessThenIOS7 = floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1;
+    
+    if (lessThenIOS7) {
+        self.datePicker = [self createDatePicker:CGRectMake(0, 40, 0, 0)];
         
-        BOOL lessThenIOS7 = floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1;
+        self.datePickerCloseButton = [self createCloseButton:@"" target:self action:@selector(dismissPicker:)];
         
-        if (lessThenIOS7) {
-            self.datePicker = [self createDatePicker:CGRectMake(0, 40, 0, 0)];
-            
-            self.datePickerCloseButton = [self createCloseButton:@"" target:self action:@selector(dismissPicker:)];
-            
-            [self initActionSheet:self datePicker:self.datePicker closeButton:self.datePickerCloseButton];
-        } else {
-            [self initPickerView:theWebView.superview];
-        }
+        [self initActionSheet:self datePicker:self.datePicker closeButton:self.datePickerCloseButton];
+    } else {
+        [self initPickerView:self.webView.superview];
     }
-    
-    return self;
 }
 
 - (void)show:(CDVInvokedUrlCommand*)command
