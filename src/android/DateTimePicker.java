@@ -18,7 +18,6 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.TimePickerDialog.OnTimeSetListener;
-import android.content.Context;
 import android.util.Log;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
@@ -79,7 +78,7 @@ public class DateTimePicker extends CordovaPlugin {
 	private static final String ACTION_DATE = "date";
 	private static final String ACTION_CALENDAR = "calendar";
 	private static final String ACTION_TIME = "time";
-	private final String pluginName = "DateTimePicker";
+	private static final String PLUGIN_NAME = "DateTimePicker";
 
 	private Activity _activity;
 	
@@ -92,7 +91,7 @@ public class DateTimePicker extends CordovaPlugin {
 	
 	@Override
 	public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
-		Log.d(pluginName, "DateTimePicker called with options: " + args);
+		Log.d(PLUGIN_NAME, "DateTimePicker called with options: " + args);
 
 		if (action.equals("show")) {
 			show(args, callbackContext);
