@@ -36,9 +36,9 @@ public class DateTimePicker extends CordovaPlugin {
 		@Nonnull
 		public String mode = "date";
 		public Date date = new Date();
-		public Boolean allowOldDates = true;
-		public Boolean allowFutureDates = true;
-		public Integer minuteInterval = 1;
+		public boolean allowOldDates = true;
+		public boolean allowFutureDates = true;
+		public int minuteInterval = 1;
 		public String locale = "EN";
 		public String okText = "Select";
 		public String cancelText = "Cancel";

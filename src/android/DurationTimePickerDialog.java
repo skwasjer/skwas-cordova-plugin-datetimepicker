@@ -21,7 +21,7 @@ public class DurationTimePickerDialog extends TimePickerDialog
 	final int mHourOfDay, mMinute;
 
 	// In Honeycomb upwards, we have access to the time picker. In Lollipop, the time picker has changed to a radial picker, and we can't change the interval.
-	Boolean mIsSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
+	boolean mIsSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
 
 	public DurationTimePickerDialog(Context context, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int increment)
 	{
