@@ -42,6 +42,38 @@ public class DateTimePicker extends CordovaPlugin {
 		public String locale = "EN";
 		public String okText = "Select";
 		public String cancelText = "Cancel";
+
+		public DateTimePickerOptions () {
+		}
+
+		public DateTimePickerOptions (JSONObject obj) throws JSONException {
+			this();
+
+			// Get mode.
+			if (obj.has("mode")) {
+				mode = obj.getString("mode");
+			}
+
+			// Get interval for time picker.
+			if (obj.has("minuteInterval")) {
+				minuteInterval = obj.getInt("minuteInterval");
+			}
+
+			// Get date/time.
+			if (obj.has("date")) {
+				String sDate = obj.getString("date");
+				if (sDate != null && sDate != "") {
+					try {
+						// Attempt to parse with ISO 8601.
+						date = ISO8601.toDate(sDate);
+					} catch (ParseException ex) {
+						throw new JSONException(ex.getMessage());
+					}
+				}
+			}
+
+			// Other values currently not handled/supported in Android...
+		}
 	}
 
 	private static final String ACTION_DATE = "date";
@@ -72,49 +104,22 @@ public class DateTimePicker extends CordovaPlugin {
 	public synchronized boolean show(final JSONArray data, final CallbackContext callbackContext) {
 		final Runnable runnable;
 		final DateTimePicker datePickerPlugin = this;
-		final DateTimePickerOptions options = new DateTimePickerOptions();
+		final DateTimePickerOptions options;
 
-		// Parse information from data parameter.
+		// Parse options from data parameter.
 		if (data.length() == 1) {
-			JSONObject obj = null;
 			try {
-				obj = data.getJSONObject(0);
-				
-				// Get mode.
-				if (obj.has("mode")) {
-					options.mode = obj.getString("mode");
-				}
-	
-				// Get interval for time picker.
-				if (obj.has("minuteInterval")) {
-					options.minuteInterval = obj.getInt("minuteInterval");
-				}
-
-				// Get date/time.
-				if (obj.has("date")) {
-					String date = obj.getString("date");
-					if (date != null && date != "") {
-						try {
-							// Attempt to parse with ISO 8601.
-							options.date = ISO8601.toDate(date);
-						} catch (ParseException ex) {
-							callbackContext.error("Failed to parse date/time: " + date);
-							return false;
-						}
-					}
-				}
-	
-				// Other values currently not handled/supported in Android...
+				options = new DateTimePickerOptions(data.getJSONObject(0));
 			}
 			catch (JSONException ex) {
-				if (obj == null)
-					callbackContext.error("Failed to load JSON options." + ex.getMessage());
-				else
-					callbackContext.error("Invalid property in JSON options: " + obj.toString());
+				callbackContext.error("Failed to load JSON options. " + ex.getMessage());
 				return false;
 			}
 		}
-
+		else {
+			// Defaults.
+			options = new DateTimePickerOptions();
+		}
 
 		// Set calendar.
 		final Calendar calendar = GregorianCalendar.getInstance();
@@ -176,14 +181,11 @@ public class DateTimePicker extends CordovaPlugin {
 					dateDialog.show();
 				}
 			};
-
-
 		}
 		else {
-			callbackContext.error("Unknown mode. Only 'date' or 'time' are valid actions");
+			callbackContext.error("Unknown mode. Only 'date', 'time' and 'calendar' are valid modes.");
 			return false;
 		}
-
 
 		cordova.getActivity().runOnUiThread(runnable);
 		return true;
@@ -248,6 +250,7 @@ public class DateTimePicker extends CordovaPlugin {
 			calendar.set(Calendar.MILLISECOND, 0);
 
 			Date date = calendar.getTime();
+            String s = ISO8601.toString(calendar);
 			Long millis = Long.valueOf(date.getTime());
 			try {
 				callbackContext.success(JSONObject.numberToString(millis));
