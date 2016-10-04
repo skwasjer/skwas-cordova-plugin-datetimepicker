@@ -1,7 +1,6 @@
 package com.skwas.cordova.datetimepicker;
 
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Calendar;
@@ -24,8 +23,26 @@ import android.util.Log;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
+import javax.annotation.Nonnull;
+
 public class DateTimePicker extends CordovaPlugin {
 
+	/**
+	 * Options for date picker.
+	 *
+	 * Note that not all options are supported, they are here to match the options across all platforms.
+	 */
+	private class DateTimePickerOptions {
+		@Nonnull
+		public String mode = "date";
+		public Date date = new Date();
+		public Boolean allowOldDates = true;
+		public Boolean allowFutureDates = true;
+		public Integer minuteInterval = 1;
+		public String locale = "EN";
+		public String okText = "Select";
+		public String cancelText = "Cancel";
+	}
 
 	private static final String ACTION_DATE = "date";
 	private static final String ACTION_CALENDAR = "calendar";
@@ -38,7 +55,7 @@ public class DateTimePicker extends CordovaPlugin {
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         
-        _activity = cordova.getActivity();        
+        _activity = cordova.getActivity();
     } 
 	
 	@Override
@@ -53,13 +70,9 @@ public class DateTimePicker extends CordovaPlugin {
 	}
 
 	public synchronized boolean show(final JSONArray data, final CallbackContext callbackContext) {
-		Calendar calendar = GregorianCalendar.getInstance();
 		final Runnable runnable;
-		final Context currentCtx = cordova.getActivity();
 		final DateTimePicker datePickerPlugin = this;
-
-		int minuteInterval = 1;
-		String action = "date";
+		final DateTimePickerOptions options = new DateTimePickerOptions();
 
 		// Parse information from data parameter.
 		if (data.length() == 1) {
@@ -68,29 +81,30 @@ public class DateTimePicker extends CordovaPlugin {
 				obj = data.getJSONObject(0);
 				
 				// Get mode.
-				action = obj.getString("mode");
+				if (obj.has("mode")) {
+					options.mode = obj.getString("mode");
+				}
 	
 				// Get interval for time picker.
-				String sMinuteInterval = obj.getString("minuteInterval");
-				if (sMinuteInterval != null && sMinuteInterval != "") {
-                    minuteInterval = Integer.parseInt(sMinuteInterval);
-                }
-	
+				if (obj.has("minuteInterval")) {
+					options.minuteInterval = obj.getInt("minuteInterval");
+				}
+
 				// Get date/time.
-				String date = obj.getString("date");
-				if (date != null && date != "") {
-					try {
-						// Attempt to parse with ISO 8601.
-						calendar = ISO8601.toCalendar(date);
-					}
-					catch (ParseException ex) {
-						callbackContext.error("Failed to parse date/time: " + date);
-						return false;
+				if (obj.has("date")) {
+					String date = obj.getString("date");
+					if (date != null && date != "") {
+						try {
+							// Attempt to parse with ISO 8601.
+							options.date = ISO8601.toDate(date);
+						} catch (ParseException ex) {
+							callbackContext.error("Failed to parse date/time: " + date);
+							return false;
+						}
 					}
 				}
 	
-				// Currently not handled in Android...
-				// boolean optionAllowOldDates = obj.getBoolean("allowOldDates");
+				// Other values currently not handled/supported in Android...
 			}
 			catch (JSONException ex) {
 				if (obj == null)
@@ -102,24 +116,23 @@ public class DateTimePicker extends CordovaPlugin {
 		}
 
 
-		// Get final values.
-		final int mYear = calendar.get(Calendar.YEAR);
-		final int mMonth = calendar.get(Calendar.MONTH);
-		final int mDay = calendar.get(Calendar.DAY_OF_MONTH);
-		final int mHour = calendar.get(Calendar.HOUR_OF_DAY);
-		final int mMinutes = calendar.get(Calendar.MINUTE);
-		final int mMinuteInterval = minuteInterval;
-		final String sAction = action;
-		final Calendar fCalendar = calendar;
+		// Set calendar.
+		final Calendar calendar = GregorianCalendar.getInstance();
+		calendar.setTime(options.date);
 
-
-		if (ACTION_TIME.equalsIgnoreCase(action)) {
+		if (ACTION_TIME.equalsIgnoreCase(options.mode)) {
 			runnable = new Runnable() {
 				@Override
 				public void run() {
-					final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext, fCalendar);
+					final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext, calendar);
 					final DurationTimePickerDialog timeDialog = new DurationTimePickerDialog(
-							currentCtx, timeSetListener, mHour, mMinutes, true, mMinuteInterval);
+							_activity,
+							timeSetListener,
+							calendar.get(Calendar.HOUR_OF_DAY),
+							calendar.get(Calendar.MINUTE),
+							true,
+							options.minuteInterval
+					);
 
 					timeDialog.setCancelable(true);
 					timeDialog.setCanceledOnTouchOutside(false);
@@ -127,21 +140,24 @@ public class DateTimePicker extends CordovaPlugin {
 					timeDialog.show();
 				}
 			};
-
-
 		} 
-		else if (ACTION_DATE.equalsIgnoreCase(action) || ACTION_CALENDAR.equalsIgnoreCase(action)) {
+		else if (ACTION_DATE.equalsIgnoreCase(options.mode) || ACTION_CALENDAR.equalsIgnoreCase(options.mode)) {
 			runnable = new Runnable() {
 				@Override
 				public void run() {
-					final DateSetListener dateSetListener = new DateSetListener(datePickerPlugin, callbackContext, fCalendar);
+					final DateSetListener dateSetListener = new DateSetListener(datePickerPlugin, callbackContext, calendar);
 					final DatePickerDialog dateDialog = new DatePickerDialog(
-							currentCtx, dateSetListener, mYear, mMonth, mDay);
+							_activity,
+							dateSetListener,
+							calendar.get(Calendar.YEAR),
+							calendar.get(Calendar.MONTH),
+							calendar.get(Calendar.DAY_OF_MONTH)
+					);
 
 					dateDialog.setCancelable(true);
 					dateDialog.setCanceledOnTouchOutside(false);
 
-					if (ACTION_CALENDAR.equalsIgnoreCase(sAction)) {
+					if (ACTION_CALENDAR.equalsIgnoreCase(options.mode)) {
 						try
 						{
 							Method getDatePicker = DatePickerDialog.class.getMethod("getDatePicker");
@@ -164,7 +180,7 @@ public class DateTimePicker extends CordovaPlugin {
 
 		}
 		else {
-			callbackContext.error("Unknown action. Only 'date' or 'time' are valid actions");
+			callbackContext.error("Unknown mode. Only 'date' or 'time' are valid actions");
 			return false;
 		}
 
