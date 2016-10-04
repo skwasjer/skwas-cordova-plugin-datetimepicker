@@ -84,7 +84,7 @@ public class DateTimePicker extends CordovaPlugin {
 	private static final String ACTION_DATE = "date";
 	private static final String ACTION_CALENDAR = "calendar";
 	private static final String ACTION_TIME = "time";
-	private static final String PLUGIN_NAME = "DateTimePicker";
+	private static final String TAG = "DateTimePicker";
 
 	private Activity _activity;
 	
@@ -97,7 +97,7 @@ public class DateTimePicker extends CordovaPlugin {
 	
 	@Override
 	public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
-		Log.d(PLUGIN_NAME, "DateTimePicker called with options: " + args);
+		Log.d(TAG, "DateTimePicker called with options: " + args);
 
 		if (action.equals("show")) {
 			show(args, callbackContext);
