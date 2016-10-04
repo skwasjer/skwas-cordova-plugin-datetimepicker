@@ -72,6 +72,11 @@ public class DateTimePicker extends CordovaPlugin {
 				}
 			}
 
+			// Get date from ticks.
+			if (obj.has("ticks")) {
+				date = new Date(obj.getLong("ticks"));
+			}
+
 			// Other values currently not handled/supported in Android...
 		}
 	}
