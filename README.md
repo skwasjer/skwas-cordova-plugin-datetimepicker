@@ -23,7 +23,7 @@ show(options, successCallback, errorCallback);
 
 | Name                | Type                | Android                    | iOS                        |
 |---------------------|---------------------|:--------------------------:|:--------------------------:|
-| mode                | String              | `date`, `time`, `calendar` | `date`, `time`, `datetime` |
+| mode                | String              | `date`, `time`, `datetime` | `date`, `time`, `datetime` |
 | date                | Date                | required                   | required                   |
 | allowOldDates       | boolean             | -                          | supported                  |
 | allowFutureDates    | boolean             | -                          | supported                  |

@@ -81,9 +81,9 @@ public class DateTimePicker extends CordovaPlugin {
 		}
 	}
 
-	private static final String ACTION_DATE = "date";
-	private static final String ACTION_CALENDAR = "calendar";
-	private static final String ACTION_TIME = "time";
+	private static final String MODE_DATE = "date";
+	private static final String MODE_TIME = "time";
+	private static final String MODE_DATETIME = "datetime";
 	private static final String TAG = "DateTimePicker";
 
 	private Activity _activity;
@@ -136,7 +136,7 @@ public class DateTimePicker extends CordovaPlugin {
 		final Calendar calendar = GregorianCalendar.getInstance();
 		calendar.setTime(options.date);
 
-		if (ACTION_TIME.equalsIgnoreCase(options.mode)) {
+		if (MODE_TIME.equalsIgnoreCase(options.mode)) {
 			runnable = new Runnable() {
 				@Override
 				public void run() {
@@ -152,7 +152,7 @@ public class DateTimePicker extends CordovaPlugin {
 				}
 			};
 		} 
-		else if (ACTION_DATE.equalsIgnoreCase(options.mode) || ACTION_CALENDAR.equalsIgnoreCase(options.mode)) {
+		else if (MODE_DATE.equalsIgnoreCase(options.mode) || MODE_DATETIME.equalsIgnoreCase(options.mode)) {
 			runnable = new Runnable() {
 				@Override
 				public void run() {
@@ -165,7 +165,7 @@ public class DateTimePicker extends CordovaPlugin {
 							calendar.get(Calendar.DAY_OF_MONTH)
 					);
 
-					if (ACTION_CALENDAR.equalsIgnoreCase(options.mode)) {
+					if (MODE_DATETIME.equalsIgnoreCase(options.mode)) {
 						try
 						{
 							Method getDatePicker = DatePickerDialog.class.getMethod("getDatePicker");
@@ -186,7 +186,7 @@ public class DateTimePicker extends CordovaPlugin {
 			};
 		}
 		else {
-			callbackContext.error("Unknown mode. Only 'date', 'time' and 'calendar' are valid modes.");
+			callbackContext.error("Unknown mode. Only 'date', 'time' and 'datetime' are valid modes.");
 			return false;
 		}
 
