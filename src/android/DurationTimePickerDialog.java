@@ -70,7 +70,7 @@ public class DurationTimePickerDialog extends TimePickerDialog
 			Class<?> rClass = Class.forName("com.android.internal.R$id");
 			Field timePicker = rClass.getField("timePicker");
 			mTimePicker = (TimePicker)findViewById(timePicker.getInt(null));
-			Field m = rClass.getField("mMinute");
+			Field m = rClass.getField("minute");
 
 			NumberPicker mMinuteSpinner = (NumberPicker)mTimePicker.findViewById(m.getInt(null));
 			if (mMinuteSpinner == null) {
