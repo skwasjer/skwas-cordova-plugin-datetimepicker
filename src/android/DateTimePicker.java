@@ -15,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.TimePickerDialog.OnTimeSetListener;
@@ -129,19 +130,14 @@ public class DateTimePicker extends CordovaPlugin {
 				@Override
 				public void run() {
 					final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext, calendar);
-					final DurationTimePickerDialog timeDialog = new DurationTimePickerDialog(
+					showDialog(new DurationTimePickerDialog(
 							_activity,
 							timeSetListener,
 							calendar.get(Calendar.HOUR_OF_DAY),
 							calendar.get(Calendar.MINUTE),
 							true,
 							options.minuteInterval
-					);
-
-					timeDialog.setCancelable(true);
-					timeDialog.setCanceledOnTouchOutside(false);
-
-					timeDialog.show();
+					));
 				}
 			};
 		} 
@@ -157,9 +153,6 @@ public class DateTimePicker extends CordovaPlugin {
 							calendar.get(Calendar.MONTH),
 							calendar.get(Calendar.DAY_OF_MONTH)
 					);
-
-					dateDialog.setCancelable(true);
-					dateDialog.setCanceledOnTouchOutside(false);
 
 					if (ACTION_CALENDAR.equalsIgnoreCase(options.mode)) {
 						try
@@ -177,7 +170,7 @@ public class DateTimePicker extends CordovaPlugin {
 						}
 					}
 
-					dateDialog.show();
+					showDialog(dateDialog);
 				}
 			};
 		}
@@ -190,6 +183,12 @@ public class DateTimePicker extends CordovaPlugin {
 		return true;
 	}
 
+	private static void showDialog(AlertDialog dialog) {
+		dialog.setCancelable(true);
+		dialog.setCanceledOnTouchOutside(false);
+
+		dialog.show();
+	}
 
 	private final class DateSetListener implements OnDateSetListener {
 		@SuppressWarnings("unused")
