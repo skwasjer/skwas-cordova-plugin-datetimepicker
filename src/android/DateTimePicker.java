@@ -101,6 +101,12 @@ public class DateTimePicker extends CordovaPlugin {
 		return false;
 	}
 
+	/**
+	 * Plugin 'show' method.
+	 * @param data The JSON arguments passed to the method.
+	 * @param callbackContext The callback context.
+     * @return true when the dialog is shown
+     */
 	public synchronized boolean show(final JSONArray data, final CallbackContext callbackContext) {
 		final Runnable runnable;
 		final DateTimePicker datePickerPlugin = this;
@@ -183,6 +189,10 @@ public class DateTimePicker extends CordovaPlugin {
 		return true;
 	}
 
+	/**
+	 * Show the picker dialog.
+	 * @param dialog
+     */
 	private static void showDialog(AlertDialog dialog) {
 		dialog.setCancelable(true);
 		dialog.setCanceledOnTouchOutside(false);
@@ -190,72 +200,73 @@ public class DateTimePicker extends CordovaPlugin {
 		dialog.show();
 	}
 
-	private final class DateSetListener implements OnDateSetListener {
-		@SuppressWarnings("unused")
-		private final DateTimePicker datePickerPlugin;
-		private final CallbackContext callbackContext;
-		private final Calendar calendar;
-
-		private DateSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext, Calendar calendar) {
-			this.datePickerPlugin = datePickerPlugin;
-			this.callbackContext = callbackContext;
-			this.calendar = calendar;
-		}
-
-
-		/**
-		 * Return a string containing the date in the format YYYY/MM/DD
-		 */
-		@Override
-		public void onDateSet(final DatePicker view, final int year, final int monthOfYear, final int dayOfMonth) {
-			calendar.set(Calendar.YEAR, year);
-			calendar.set(Calendar.MONTH, monthOfYear);
-			calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
+	/**
+	 * Success callback for when a new date or time is set.
+	 * @param calendar The calendar with the new date and/or time.
+	 * @param callbackContext The callback context.
+     */
+	private static void onCalendarSet(Calendar calendar, CallbackContext callbackContext) {
+		try {
+			JSONObject result = new JSONObject();
 			Date date = calendar.getTime();
-			Long millis = Long.valueOf(date.getTime());
-			try {
-				callbackContext.success(JSONObject.numberToString(millis));
-			}
-			catch (JSONException ex) {
-				callbackContext.error("Failed to get date.");
-			}
+			// Provide the date in ISO 8601.
+			result.put("date", ISO8601.toString(date));
+			// Due to lack of browser/user agent support for ISO 8601 parsing, we also provide ticks since epoch.
+			// The Javascript date constructor works far more reliably this way, even on old JS engines.
+			result.put("ticks", date.getTime());
+			callbackContext.success(result);
+		}
+		catch (JSONException ex) {
+			callbackContext.error("Failed to serialize date. " + calendar.getTime().toString());
 		}
 	}
 
-	private final class TimeSetListener implements OnTimeSetListener {
-		@SuppressWarnings("unused")
-		private final DateTimePicker datePickerPlugin;
-		private final CallbackContext callbackContext;
-		private final Calendar calendar;
+	/**
+	 * Listener for the date dialog.
+	 */
+	private final class DateSetListener implements OnDateSetListener {
+		private final DateTimePicker mDatePickerPlugin;
+		private final CallbackContext mCallbackContext;
+		private final Calendar mCalendar;
 
-		private TimeSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext, Calendar calendar) {
-			this.datePickerPlugin = datePickerPlugin;
-			this.callbackContext = callbackContext;
-			this.calendar = calendar;
+		private DateSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext, Calendar calendar) {
+			mDatePickerPlugin = datePickerPlugin;
+			mCallbackContext = callbackContext;
+			mCalendar = calendar;
 		}
 
+		@Override
+		public void onDateSet(final DatePicker view, final int year, final int monthOfYear, final int dayOfMonth) {
+			mCalendar.set(Calendar.YEAR, year);
+			mCalendar.set(Calendar.MONTH, monthOfYear);
+			mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-		/**
-		 * Return the current date with the time modified as it was set in the
-		 * time picker.
-		 */
+			mDatePickerPlugin.onCalendarSet(mCalendar, mCallbackContext);
+		}
+	}
+
+	/**
+	 * Listener for the time dialog.
+	 */
+	private final class TimeSetListener implements OnTimeSetListener {
+		private final DateTimePicker mDatePickerPlugin;
+		private final CallbackContext mCallbackContext;
+		private final Calendar mCalendar;
+
+		private TimeSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext, Calendar calendar) {
+			mDatePickerPlugin = datePickerPlugin;
+			mCallbackContext = callbackContext;
+			mCalendar = calendar;
+		}
+
 		@Override
 		public void onTimeSet(final TimePicker view, final int hourOfDay, final int minute) {
-			calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-			calendar.set(Calendar.MINUTE, minute);
-			calendar.set(Calendar.SECOND, 0);
-			calendar.set(Calendar.MILLISECOND, 0);
+			mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+			mCalendar.set(Calendar.MINUTE, minute);
+			mCalendar.set(Calendar.SECOND, 0);
+			mCalendar.set(Calendar.MILLISECOND, 0);
 
-			Date date = calendar.getTime();
-            String s = ISO8601.toString(calendar);
-			Long millis = Long.valueOf(date.getTime());
-			try {
-				callbackContext.success(JSONObject.numberToString(millis));
-			}
-			catch (JSONException ex) {
-				callbackContext.error("Failed to get time.");
-			}
+			mDatePickerPlugin.onCalendarSet(mCalendar, mCallbackContext);
 		}
 	}
 }
