@@ -11,7 +11,8 @@ or for latest
 
 ## Supported platforms ##
 
-Currently Android and iOS are supported.
+Android 4 and higher
+iOS 8 and higher
 
 ## Methods ##
 
