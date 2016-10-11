@@ -5,7 +5,6 @@
 @property (strong) UILabel* headerLabel;
 @property (strong) UIButton *doneButton;
 @property (strong) UIButton *cancelButton;
-@property (strong) UIView *parent;
 @property (strong) UIView *internalView;
 
 @end
@@ -13,32 +12,31 @@
 @implementation ModalPickerViewController
 
 
-ModalPickerType _pickerType;
-
 const float _headerBarHeight = 38;
+const float _datePickerHeight = 200;
 
-- (id)initWithPickerType:(ModalPickerType)pickerType
-              headerText:(NSString*)headerText
+const CGSize _doneButtonSize = { 80, 30 };
+const CGSize _cancelButtonSize = { 80, 30 };
+const float _buttonMargin = 10;
+
+
+- (id)initWithHeaderText:(NSString*)headerText
              dismissText:(NSString*)dismissText
-             cancelText:(NSString*)cancelText
-                  parent:(UIView*)parent {
+             cancelText:(NSString*)cancelText {
     self.headerBackgroundColor = [UIColor whiteColor];
     self.headerTextColor = [UIColor blackColor];
     self.headerText = headerText;
     self.dismissText = dismissText;
     self.cancelText = cancelText;
-    self.pickerType = pickerType;
-    
-    _parent = parent;
-    
+
+    [self createControls];
+
     return self;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
-    [self initializeControls];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -49,157 +47,77 @@ const float _headerBarHeight = 38;
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    [self show:false];
+    _internalView.backgroundColor = _headerBackgroundColor;
+    _headerLabel.textColor = _headerTextColor;
+    _headerLabel.text = _headerText;
+    
+    [_doneButton setTitle:_dismissText forState:UIControlStateNormal];
+    [_cancelButton setTitle:_cancelText forState:UIControlStateNormal];
 }
 
 - (BOOL)shouldAutorotate {
     return YES;
 }
-- (NSUInteger)supportedInterfaceOrientations {
-    return UIInterfaceOrientationPortrait | UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight | UIInterfaceOrientationPortraitUpsideDown;
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskAll;
 }
 
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
-    
-    [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
-    
-    if (fromInterfaceOrientation != UIDeviceOrientationUnknown)
-    {
-        [self show:true];
-        [self.view setNeedsDisplay];
-    }
-}
-
-- (void)show:(BOOL)onRotate {
-    CGSize doneButtonSize = CGSizeMake(80, 30);
-    CGSize cancelButtonSize = CGSizeMake(80, 30);
-    
-    CGSize parentFrameSize = _parent.frame.size;
-    NSInteger width = UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]) ? parentFrameSize.width : parentFrameSize.height;
-    // OS reports width 568 in landscape and not 320 so previous line actually takes incorrect dimension.
-    width = parentFrameSize.width;
-    
-    // NSLog(@"Parent frame: %f, %f", parentFrameSize.width, parentFrameSize.height);
-    
-    CGSize internalViewSize = CGSizeMake(0, 0);
-    UIView *currentView = nil;
-    switch(self.pickerType)
-    {
-        case ModalPickerTypeDate:
-            currentView = self.datePicker;
-            break;
-            
-            
-        case ModalPickerTypeCustom:
-            currentView = self.pickerView;
-            break;
-        default:
-            break;
-    }
-    if (currentView != nil) {
-        currentView.frame = CGRectMake(0, 0, 0, 0);
-        internalViewSize = CGSizeMake(width, currentView.frame.size.height + _headerBarHeight);
-    }
-    
-    CGRect internalViewFrame = CGRectMake(0, 0, 0, 0);
-    CGRect viewFrame = self.view.frame;
-    CGRect viewBounds = self.view.bounds;
-    if (UIInterfaceOrientationIsPortrait(self.interfaceOrientation))
-    {
-        if (onRotate)
-        {
-            internalViewFrame = CGRectMake(0, viewFrame.size.height - internalViewSize.height,
-                                               internalViewSize.width, internalViewSize.height);
-        }
-        else
-        {
-            internalViewFrame = CGRectMake(0, viewBounds.size.height - internalViewSize.height,
-                                               internalViewSize.width, internalViewSize.height);
-        }
-    }
-    else
-    {
-        if (onRotate)
-        {
-            internalViewFrame = CGRectMake(0, viewFrame.size.width - internalViewSize.height,
-                                               internalViewSize.width, internalViewSize.height);
-        }
-        else
-        {
-            internalViewFrame = CGRectMake(0, viewBounds.size.width - internalViewSize.height,
-                                               internalViewSize.width, internalViewSize.height);
-        }
-    }
-    _internalView.frame = internalViewFrame;
-    
-    CGRect pickerFrame;
-    switch(self.pickerType)
-    {
-        case ModalPickerTypeDate:
-            pickerFrame = CGRectMake(self.datePicker.frame.origin.x, _headerBarHeight, self.datePicker.frame.size.width, self.datePicker.frame.size.height);
-            break;
-        case ModalPickerTypeCustom:
-            pickerFrame = CGRectMake(self.pickerView.frame.origin.x, _headerBarHeight, _internalView.frame.size.width, self.pickerView.frame.size.height);
-            break;
-        default:
-            break;
-    }
-    currentView.frame = pickerFrame;
-    
-    _headerLabel.frame = CGRectMake(10, 4, _parent.frame.size.width - 100, 35);
-    _doneButton.frame = CGRectMake(internalViewFrame.size.width - doneButtonSize.width - 10, 5, doneButtonSize.width, doneButtonSize.height);
-    _cancelButton.frame = CGRectMake(10, 5, cancelButtonSize.width, cancelButtonSize.height);
-    
-    //[currentView release];
-}
-
-- (void)initializeControls {
+- (void)createControls {
     self.view.backgroundColor = [UIColor clearColor];
     self.view.opaque = NO;
     
-    _internalView = [[UIView alloc] init];
-    
-    _headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 320/2, 44)];
-    _headerLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    // Measurements of our internal view.
+    CGRect viewFrame = self.view.frame;
+    CGSize internalViewSize = CGSizeMake(viewFrame.size.width, _datePickerHeight + _headerBarHeight);
+    CGRect internalViewFrame = CGRectMake(0, viewFrame.size.height - internalViewSize.height, internalViewSize.width, internalViewSize.height);
+
+    // Create header label.
+    float labelWidth = internalViewSize.width - _doneButtonSize.width - _cancelButtonSize.width - _buttonMargin * 2;
+    _headerLabel = [[UILabel alloc] initWithFrame:CGRectMake((internalViewSize.width - labelWidth) / 2, 0, labelWidth, _headerBarHeight)];
+    _headerLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
    // _headerLabel.backgroundColor = self.headerBackgroundColor;
-    _headerLabel.textColor = self.headerTextColor;
-    _headerLabel.text = self.headerText;
-    _headerLabel.hidden = YES;
-    
+    _headerLabel.adjustsFontSizeToFitWidth = NO;
+    _headerLabel.textAlignment = NSTextAlignmentCenter;
+    _headerLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+
+    // Create done button.
     _doneButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    //[_doneButton setTitleColor:self.headerTextColor forState:UIControlStateNormal];
+    _doneButton.frame = CGRectMake(internalViewFrame.size.width - _doneButtonSize.width - _buttonMargin, _buttonMargin / 2, _doneButtonSize.width, _doneButtonSize.height);
+    _doneButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin;
     _doneButton.backgroundColor = [UIColor clearColor];
-    [_doneButton setTitle:self.dismissText forState:UIControlStateNormal];
     _doneButton.titleLabel.font = [UIFont boldSystemFontOfSize:[UIFont systemFontSize] * 1.1];
     [_doneButton addTarget:self action:@selector(doneButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     
+    // Create cancel button.
     _cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    _cancelButton.frame = CGRectMake(_buttonMargin, _buttonMargin / 2, _cancelButtonSize.width, _cancelButtonSize.height);
+    _cancelButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
     _cancelButton.backgroundColor = [UIColor clearColor];
-    [_cancelButton setTitle:self.cancelText forState:UIControlStateNormal];
     _cancelButton.titleLabel.font = [UIFont systemFontOfSize:[UIFont systemFontSize] * 1.1];
     [_cancelButton addTarget:self action:@selector(cancelButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     
-    switch(self.pickerType)
-    {
-        case ModalPickerTypeDate:
-            self.datePicker.backgroundColor = [UIColor colorWithWhite:1 alpha:0.85f];
-            [_internalView addSubview:[self datePicker]];
-            break;
-        case ModalPickerTypeCustom:
-            self.pickerView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.85f];
-            [_internalView addSubview:[self pickerView]];
-            break;
-        default:
-            break;
-    }
-    _internalView.backgroundColor = self.headerBackgroundColor;
-    
+    // Create the date picker.
+    _datePicker = [[UIDatePicker alloc] initWithFrame:CGRectZero];
+    _datePicker.frame = CGRectMake(0, _headerBarHeight, internalViewSize.width, _datePickerHeight);
+    _datePicker.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+    _datePicker.backgroundColor = [UIColor colorWithWhite:1 alpha:0.85f];
+
+    // Create a view that will host our controls.
+    _internalView = [[UIView alloc] init];
+    _internalView.frame = internalViewFrame;
+    _internalView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+
+    [_internalView addSubview:_datePicker];
     [_internalView addSubview:_headerLabel];
     [_internalView addSubview:_doneButton];
     [_internalView addSubview:_cancelButton];
     
     [self.view addSubview:_internalView];
 }
+
+
+#pragma mark - Button handlers
 
 - (IBAction)doneButtonTapped:(id)sender {
     [self dismissViewControllerAnimated:true completion:nil];
@@ -212,39 +130,5 @@ const float _headerBarHeight = 38;
     // Call the callback.
     if (self.cancelHandler != nil) [self cancelHandler](self);
 }
-
-- (ModalPickerType)pickerType {
-    return _pickerType;
-}
-
-- (void)setPickerType:(ModalPickerType)pickerType {
-    switch (pickerType)
-    {
-        case ModalPickerTypeDate:
-            self.datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-            self.pickerView = nil;
-            break;
-        case ModalPickerTypeCustom:
-            self.datePicker = nil;
-            self.pickerView = [[UIPickerView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-            break;
-        default:
-            break;
-    }
-    
-    _pickerType = pickerType;
-}
-
-
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end

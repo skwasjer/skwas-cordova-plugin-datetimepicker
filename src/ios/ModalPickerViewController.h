@@ -1,20 +1,12 @@
 #import <UIKit/UIKit.h>
 
-typedef enum {
-    ModalPickerTypeDate = 0,
-    ModalPickerTypeCustom = 1
-} ModalPickerType;
-
 @interface ModalPickerViewController : UIViewController
 {
-  //  void (^_dismissedHandler)(id sender);
 }
 
-- (id)initWithPickerType:(ModalPickerType)pickerType
-              headerText:(NSString*)headerText
+- (id)initWithHeaderText:(NSString*)headerText
              dismissText:(NSString*)dismissText
-             cancelText:(NSString*)cancelText
-                  parent:(UIView*)parent;
+             cancelText:(NSString*)cancelText;
 
 @property (strong) UIColor *headerBackgroundColor;
 @property (strong) UIColor *headerTextColor;
@@ -22,13 +14,7 @@ typedef enum {
 @property (strong) NSString *dismissText;
 @property (strong) NSString *cancelText;
 @property (strong) UIDatePicker *datePicker;
-@property (strong) UIPickerView *pickerView;
-@property ModalPickerType pickerType;
 @property (nonatomic, strong) void (^dismissedHandler)(id sender);
 @property (nonatomic, strong) void (^cancelHandler)(id sender);
-
-//    self.dismissedHandler = ^(void) {
-//
-// };
 
 @end
