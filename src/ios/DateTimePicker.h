@@ -7,14 +7,10 @@
 #endif
 
 
-@interface DateTimePicker : CDVPlugin <UIActionSheetDelegate, UIViewControllerTransitioningDelegate> {
+@interface DateTimePicker : CDVPlugin <UIViewControllerTransitioningDelegate> {
    
 }
     
-    
-@property (strong) UIActionSheet* datePickerSheet;
-@property (strong) UIDatePicker* datePicker;
-@property (strong) UISegmentedControl *datePickerCloseButton;
 @property (strong) NSDateFormatter* isoDateFormatter;
 @property (strong) ModalPickerViewController* modalPicker;
 
