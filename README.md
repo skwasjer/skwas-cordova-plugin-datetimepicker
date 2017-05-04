@@ -3,6 +3,9 @@ Cordova Plugin for showing a native date, time or datetime picker.
 
 ## Changelog
 
+#### 0.8.0 ####
+- Android: fix @NonNull error when building apk
+
 #### 0.7.0 ####
 - iOS: use auto layout
 - iOS: remove < iOS 7 support (UIActionSheet)
