@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/skwas-cordova-plugin-datetimepicker.svg)](https://badge.fury.io/js/skwas-cordova-plugin-datetimepicker)
+
 # skwas-cordova-plugin-datetimepicker
 Cordova Plugin for showing a native date, time or datetime picker.
 
