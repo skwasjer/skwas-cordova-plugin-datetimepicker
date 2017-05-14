@@ -31,8 +31,8 @@ show(options, successCallback, errorCallback);
 | allowOldDates       | boolean             | true           | -                          | supported                  |
 | allowFutureDates    | boolean             | true           | -                          | supported                  |
 | minuteInterval      | int                 | 1              | >= Honeycomb               | supported                  |
-| locale              | String              | "EN"           | -                          | supported                  |
-| okText              | String              | "Select"       | -                          | supported                  |
+| locale              | String              | "EN"           | supported                  | supported                  |
+| okText              | String              | "Select"       | supported                  | supported                  |
 | cancelText          | String              | "Cancel"       | -                          | supported                  |
 | android             | Object              | {}             | optional                   | ignored                    |
 
@@ -75,6 +75,10 @@ cordova.plugins.DateTimePicker.show({
 
 ## Changelog
 
+#### 0.9.1 ####
+
+- Android: add support for okText/cancelText
+
 #### 0.9.0 ####
 
 - Android: fixed datetime mode only showing date picker (see #10)
@@ -82,9 +86,11 @@ cordova.plugins.DateTimePicker.show({
 - Android: added calendar switch
 
 #### 0.8.0 ####
+
 - Android: fix @NonNull error when building apk
 
 #### 0.7.0 ####
+
 - iOS: use auto layout
 - iOS: remove < iOS 7 support (UIActionSheet)
 - iOS: remove custom modal picker type
