@@ -40,6 +40,8 @@ THE SOFTWARE.
 
     <!-- android -->
     <platform name="android">
+        <framework src="com.android.support:support-annotations:+" />
+
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="DateTimePicker" >
                 <param name="android-package" value="com.skwas.cordova.datetimepicker.DateTimePicker"/>
