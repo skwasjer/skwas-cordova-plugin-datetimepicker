@@ -136,61 +136,69 @@ public class DateTimePicker extends CordovaPlugin {
 		calendar.setTime(options.date);
 
 		if (MODE_TIME.equalsIgnoreCase(options.mode)) {
-			runnable = new Runnable() {
-				@Override
-				public void run() {
-					final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext, calendar);
-					showDialog(new DurationTimePickerDialog(
-							_activity,
-							timeSetListener,
-							calendar.get(Calendar.HOUR_OF_DAY),
-							calendar.get(Calendar.MINUTE),
-							true,
-							options.minuteInterval
-					));
-				}
-			};
-		} 
+			runnable = showTimeDialog(datePickerPlugin, callbackContext, options, calendar);
+		}
 		else if (MODE_DATE.equalsIgnoreCase(options.mode) || MODE_DATETIME.equalsIgnoreCase(options.mode)) {
-			runnable = new Runnable() {
-				@Override
-				public void run() {
-					final DateSetListener dateSetListener = new DateSetListener(datePickerPlugin, callbackContext, calendar);
-					final DatePickerDialog dateDialog = new DatePickerDialog(
-							_activity,
-							dateSetListener,
-							calendar.get(Calendar.YEAR),
-							calendar.get(Calendar.MONTH),
-							calendar.get(Calendar.DAY_OF_MONTH)
-					);
-
-					if (MODE_DATETIME.equalsIgnoreCase(options.mode)) {
-						try
-						{
-							Method getDatePicker = DatePickerDialog.class.getMethod("getDatePicker");
-							DatePicker dp = (DatePicker)getDatePicker.invoke(dateDialog, (Object[])null);
-
-							Method setCalendarViewShown = DatePicker.class.getMethod("setCalendarViewShown", boolean.class);
-							setCalendarViewShown.invoke(dp, true);
-							Method setSpinnersShown = DatePicker.class.getMethod("setSpinnersShown", boolean.class);
-							setSpinnersShown.invoke(dp, false);
-						}
-						catch (Exception ex) {
-							//ex.printStackTrace();
-						}
-					}
-
-					showDialog(dateDialog);
-				}
-			};
+			runnable = showDateDialog(datePickerPlugin, callbackContext, options, calendar);
 		}
 		else {
 			callbackContext.error("Unknown mode. Only 'date', 'time' and 'datetime' are valid modes.");
 			return false;
 		}
 
-		cordova.getActivity().runOnUiThread(runnable);
+		_activity.runOnUiThread(runnable);
 		return true;
+	}
+
+	private Runnable showTimeDialog(final DateTimePicker datePickerPlugin, final CallbackContext callbackContext, final DateTimePickerOptions options, final Calendar calendar) {
+		return new Runnable() {
+			@Override
+			public void run() {
+				final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext, options, calendar);
+				showDialog(new DurationTimePickerDialog(
+						_activity,
+						timeSetListener,
+						calendar.get(Calendar.HOUR_OF_DAY),
+						calendar.get(Calendar.MINUTE),
+						true,
+						options.minuteInterval
+				));
+			}
+		};
+	}
+
+	private Runnable showDateDialog(final DateTimePicker datePickerPlugin, final CallbackContext callbackContext, final DateTimePickerOptions options, final Calendar calendar) {
+		return new Runnable() {
+			@Override
+			public void run() {
+				final DateSetListener dateSetListener = new DateSetListener(datePickerPlugin, callbackContext, options, calendar);
+				final DatePickerDialog dateDialog = new DatePickerDialog(
+						_activity,
+						dateSetListener,
+						calendar.get(Calendar.YEAR),
+						calendar.get(Calendar.MONTH),
+						calendar.get(Calendar.DAY_OF_MONTH)
+				);
+
+				if (MODE_DATETIME.equalsIgnoreCase(options.mode)) {
+					try
+					{
+						Method getDatePicker = DatePickerDialog.class.getMethod("getDatePicker");
+						DatePicker dp = (DatePicker)getDatePicker.invoke(dateDialog, (Object[])null);
+
+						Method setCalendarViewShown = DatePicker.class.getMethod("setCalendarViewShown", boolean.class);
+						setCalendarViewShown.invoke(dp, true);
+						Method setSpinnersShown = DatePicker.class.getMethod("setSpinnersShown", boolean.class);
+						setSpinnersShown.invoke(dp, false);
+					}
+					catch (Exception ex) {
+						//ex.printStackTrace();
+					}
+				}
+
+				showDialog(dateDialog);
+			}
+		};
 	}
 
 	/**
@@ -231,12 +239,14 @@ public class DateTimePicker extends CordovaPlugin {
 	private final class DateSetListener implements OnDateSetListener {
 		private final DateTimePicker mDatePickerPlugin;
 		private final CallbackContext mCallbackContext;
+		private final DateTimePickerOptions mOptions;
 		private final Calendar mCalendar;
 
-		private DateSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext, Calendar calendar) {
+		private DateSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext, DateTimePickerOptions options, Calendar calendar) {
 			mDatePickerPlugin = datePickerPlugin;
 			mCallbackContext = callbackContext;
 			mCalendar = calendar;
+			mOptions = options;
 		}
 
 		@Override
@@ -245,7 +255,14 @@ public class DateTimePicker extends CordovaPlugin {
 			mCalendar.set(Calendar.MONTH, monthOfYear);
 			mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-			mDatePickerPlugin.onCalendarSet(mCalendar, mCallbackContext);
+			if (MODE_DATETIME.equalsIgnoreCase(mOptions.mode)) {
+				_activity.runOnUiThread(
+					showTimeDialog(mDatePickerPlugin, mCallbackContext, mOptions, mCalendar)
+				);
+			}
+			else {
+				mDatePickerPlugin.onCalendarSet(mCalendar, mCallbackContext);
+			}
 		}
 	}
 
@@ -255,11 +272,13 @@ public class DateTimePicker extends CordovaPlugin {
 	private final class TimeSetListener implements OnTimeSetListener {
 		private final DateTimePicker mDatePickerPlugin;
 		private final CallbackContext mCallbackContext;
+		private final DateTimePickerOptions mOptions;
 		private final Calendar mCalendar;
 
-		private TimeSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext, Calendar calendar) {
+		private TimeSetListener(DateTimePicker datePickerPlugin, CallbackContext callbackContext, DateTimePickerOptions options, Calendar calendar) {
 			mDatePickerPlugin = datePickerPlugin;
 			mCallbackContext = callbackContext;
+			mOptions = options;
 			mCalendar = calendar;
 		}
 
