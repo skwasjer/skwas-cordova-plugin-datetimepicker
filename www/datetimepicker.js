@@ -40,31 +40,49 @@ function DateTimePicker() {
 DateTimePicker.prototype.show = function(options, successCallback, errorCallback) {
 	function noop() {};
 
+	var settings = {
+		mode: "date",
+		date: new Date(),
+		allowOldDates: null,
+		allowFutureDates: null,
+		minuteInterval: 1,
+		locale: "EN",
+		okText: null,
+		cancelText: null,
+		android: {
+			theme: undefined,	// If omitted/undefined, default theme will be used.
+			calendar: false
+		},
+		success: undefined,
+		cancel: undefined,
+		error: undefined
+	};
+
 	function onPluginError(err) {
-		if (options.error !== noop)
-			options.error(err);
+		if (settings.error !== noop)
+			settings.error(err);
 		else
 			console.error("DatePickerPlugin: " + err);
 	};
-	
+
 	function onPluginSuccess(result) {
 		// The plugin expects the result to be:
 		//
 		// {
 		//	 "result": {
-		//     "ticks": a 64-bit int (ticks),
-		//     "cancelled": true|false
+		//	   "ticks": a 64-bit int (ticks),
+		//	   "cancelled": true|false
 		//	 }
 		// }
 
 		if (typeof result !== "undefined" && result !== null) {
 			if (typeof result === "object") {
 				if (result.cancelled === true) {
-					options.cancel();
+					settings.cancel();
 				} else if (typeof result.ticks === "number") {
 					var resultDate = new Date(result.ticks);
 					if (isDate(resultDate)) {
-						options.success(resultDate);
+						settings.success(resultDate);
 					}
 				}
 				return;
@@ -85,24 +103,6 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		return true;
 	}
 
-	var settings = {
-		mode: "date",
-		date: new Date(),
-		allowOldDates: null,
-		allowFutureDates: null,
-		minuteInterval: 1,
-		locale: "EN",
-		okText: null,
-		cancelText: null,
-		android: {
-			theme: undefined,	// If omitted/undefined, default theme will be used.
-			calendar: false	
-		},
-		success: undefined,
-		cancel: undefined,
-		error: undefined
-	};
-
 	// Copy options into settings overwriting the defaults.
 	for (var key in settings) {
 		if (typeof options[key] !== "undefined")
@@ -110,9 +110,9 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 	}
 
 	// Set default callbacks if not set, or no function provided.
-	if (typeof options.success !== "function") options.success = successCallback || noop;
-	if (typeof options.cancel !== "function") options.cancel = noop;
-	if (typeof options.error !== "function") options.error = errorCallback || noop;
+	if (typeof settings.success !== "function") settings.success = successCallback || noop;
+	if (typeof settings.cancel !== "function") settings.cancel = noop;
+	if (typeof settings.error !== "function") settings.error = errorCallback || noop;
 
 	// Check if dates are valid and convert to ticks since epoch.
 	if (!checkDate(settings, "date", onPluginError)) {
