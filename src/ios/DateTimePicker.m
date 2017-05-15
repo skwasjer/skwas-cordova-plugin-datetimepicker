@@ -5,9 +5,6 @@
 @interface DateTimePicker() // (Private)
 
 
-// Creates the NSDateFormatter with NSString format and NSTimeZone timezone
-- (NSDateFormatter *)createISODateFormatter:(NSString *)format timezone:(NSTimeZone *)timezone;
-
 // Configures the UIDatePicker with the NSMutableDictionary options
 - (void)configureDatePicker:(NSMutableDictionary *)optionsOrNil datePicker:(UIDatePicker *)datePicker;
 
@@ -28,8 +25,6 @@
 
 
 - (void)pluginInitialize {
-    self.isoDateFormatter = [self createISODateFormatter:k_DATEPICKER_DATETIME_FORMAT timezone:[NSTimeZone defaultTimeZone]];
-    
     [self initPickerView:self.webView.superview];
 }
 
@@ -99,45 +94,29 @@
     };
     
     picker.cancelHandler = ^(id sender) {
+        [self callbackCancelWithJavascript];
         isVisible = NO;
     };
     
     self.modalPicker = picker;
 }
 
-- (NSDateFormatter *)createISODateFormatter:(NSString *)format timezone:(NSTimeZone *)timezone;
-{
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setTimeZone:timezone];
-    [dateFormatter setDateFormat:format];
-    return dateFormatter;
-}
-
 - (NSDate *)getRoundedDate:(NSDate *)inDate minuteInterval:(NSInteger)minuteInterval
 {
-    NSDateComponents *dateComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitMinute fromDate:inDate];
+    NSDate *truncatedDate = [self truncateSecondsForDate:inDate];
+    NSDateComponents *dateComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitMinute fromDate:truncatedDate];
     NSInteger minutes = [dateComponents minute];
     NSInteger minutesRounded = ( (NSInteger)(minutes / minuteInterval) ) * minuteInterval;
-    NSDate *roundedDate = [[NSDate alloc] initWithTimeInterval:60.0 * (minutesRounded - minutes) sinceDate:inDate];
+    NSDate *roundedDate = [[NSDate alloc] initWithTimeInterval:60.0 * (minutesRounded - minutes) sinceDate:truncatedDate];
     return roundedDate;
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // Set the date picker's value (and the selected date on the UI display) to
-    // the rounded date.
-    /*      if ([roundedDate isEqualToDate:inDate])
-     {
-     // We need to set the date picker's value to something different than
-     // the rounded date, because the second call to set the date picker's
-     // date with the same value is ignored. Which could be bad since the
-     // call above to set the date picker's minute interval can leave the
-     // date picker with the wrong selected date (the whole reason why we are
-     // doing this).
-     NSDate *diffrentDate = [[NSDate alloc] initWithTimeInterval:60 sinceDate:roundedDate];
-     returnDate = diffrentDate;
-     //[diffrentDate release];
-     }
-     
-     returnDate = roundedDate;
-     return returnDate;*/
+}
+
+- (NSDate *)truncateSecondsForDate:(NSDate *)fromDate;
+{
+    NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSCalendarUnit unitFlags = NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth |  NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute;
+    NSDateComponents *fromDateComponents = [gregorian components:unitFlags fromDate:fromDate ];
+    return [gregorian dateFromComponents:fromDateComponents];
 }
 
 - (void)configureDatePicker:(NSMutableDictionary *)optionsOrNil datePicker:(UIDatePicker *)datePicker;
@@ -172,17 +151,27 @@
     
     datePicker.minuteInterval = minuteInterval;
     
-    // Lastly, set to something else first, to force an update.
+    // Set to something else first, to force an update.
     datePicker.date = [NSDate dateWithTimeIntervalSince1970:0];
-   // datePicker.date = [self getRoundedDate:[self.isoDateFormatter dateFromString:dateString]  minuteInterval:minuteInterval];
     datePicker.date = [self getRoundedDate:[[NSDate alloc] initWithTimeIntervalSince1970:(ticks / 1000)] minuteInterval:minuteInterval];
 }
 
 // Sends the date to the plugin javascript handler.
-- (void)callbackSuccessWithJavascript:(NSDate *)date {
+- (void)callbackSuccessWithJavascript:(NSDate *)date
+{
     long long ticks = ((long long)(int)[date timeIntervalSince1970]) * 1000;
     NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
     [result setObject:[NSNumber numberWithLongLong:ticks] forKey:@"ticks"];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+}
+
+// Sends a cancellation notification to the plugin javascript handler.
+- (void)callbackCancelWithJavascript
+{
+    NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
+    [result setObject:[NSNumber numberWithBool:YES] forKey:@"cancelled"];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];

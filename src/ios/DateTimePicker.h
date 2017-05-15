@@ -11,7 +11,6 @@
    
 }
     
-@property (strong) NSDateFormatter* isoDateFormatter;
 @property (strong) ModalPickerViewController* modalPicker;
 
 - (void)show:(CDVInvokedUrlCommand*)command;
