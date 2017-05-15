@@ -1,6 +1,5 @@
 package com.skwas.cordova.datetimepicker;
 
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -15,11 +14,11 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
-import android.app.TimePickerDialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
@@ -60,12 +59,16 @@ public class DateTimePicker extends CordovaPlugin {
 			// Other values currently not handled/supported in Android...
 			allowOldDates = obj.optBoolean("allowOldDates", allowOldDates);
 			allowFutureDates = obj.optBoolean("allowFutureDates", allowFutureDates);
+
 			if (!obj.isNull("okText")) {
 				okText = obj.optString("okText");
 			}
+			okText = TextUtils.isEmpty(okText) ? _activity.getString(android.R.string.ok) : okText;
+
 			if (!obj.isNull("cancelText")) {
 				cancelText = obj.optString("cancelText");
 			}
+			cancelText = TextUtils.isEmpty(cancelText) ? _activity.getString(android.R.string.cancel) : cancelText;
 
 			JSONObject androidOptions = obj.optJSONObject("android");
 			if (androidOptions != null) {
@@ -150,7 +153,7 @@ public class DateTimePicker extends CordovaPlugin {
 			@Override
 			public void run() {
 				final TimeSetListener timeSetListener = new TimeSetListener(datePickerPlugin, callbackContext, options, calendar);
-				final TimePickerDialog timeDialog = new DurationTimePickerDialog(
+				final TimePickerDialog timeDialog = new TimePickerDialog(
 					_activity,
 					options.theme,
 					timeSetListener,
@@ -160,14 +163,10 @@ public class DateTimePicker extends CordovaPlugin {
 					options.minuteInterval
 				);
 
-				if (options.okText != null && !options.okText.isEmpty()) {
-					timeDialog.setButton(DatePickerDialog.BUTTON_POSITIVE, options.okText, timeDialog);
-				}
-				if (options.cancelText != null && !options.cancelText.isEmpty()) {
-					timeDialog.setButton(DatePickerDialog.BUTTON_NEGATIVE, options.cancelText, timeDialog);
-				}
+				timeDialog.setOkText(options.okText);
+				timeDialog.setCancelText(options.cancelText);
 
-				showDialog(timeDialog);
+				showDialog(timeDialog, callbackContext);
 			}
 		};
 	}
@@ -186,41 +185,36 @@ public class DateTimePicker extends CordovaPlugin {
 						calendar.get(Calendar.DAY_OF_MONTH)
 				);
 
-				if (options.okText != null && !options.okText.isEmpty()) {
-					dateDialog.setButton(DatePickerDialog.BUTTON_POSITIVE, options.okText, dateDialog);
-				}
-				if (options.cancelText != null && !options.cancelText.isEmpty()) {
-					dateDialog.setButton(DatePickerDialog.BUTTON_NEGATIVE, options.cancelText, dateDialog);
-				}
+				dateDialog.setOkText(options.okText);
+				dateDialog.setCancelText(options.cancelText);
+				dateDialog.setCalendarEnabled(options.calendar);
 
-				if (options.calendar) {
-					try
-					{
-						Method getDatePicker = DatePickerDialog.class.getMethod("getDatePicker");
-						DatePicker dp = (DatePicker)getDatePicker.invoke(dateDialog, (Object[])null);
-
-						Method setCalendarViewShown = DatePicker.class.getMethod("setCalendarViewShown", boolean.class);
-						setCalendarViewShown.invoke(dp, true);
-						Method setSpinnersShown = DatePicker.class.getMethod("setSpinnersShown", boolean.class);
-						setSpinnersShown.invoke(dp, false);
-					}
-					catch (Exception ex) {
-						//ex.printStackTrace();
-					}
-				}
-
-				showDialog(dateDialog);
+				showDialog(dateDialog, callbackContext);
 			}
 		};
 	}
 
 	/**
 	 * Show the picker dialog.
-	 * @param dialog
+	 * @param dialog The dialog to show.
+	 * @param callbackContext The callback context.
      */
-	private static void showDialog(AlertDialog dialog) {
+	private static void showDialog(final AlertDialog dialog, final CallbackContext callbackContext) {
 		dialog.setCancelable(true);
 		dialog.setCanceledOnTouchOutside(false);
+
+		dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				try {
+					JSONObject result = new JSONObject();
+					result.put("cancelled", true);
+					callbackContext.success(result);
+				} catch (JSONException ex) {
+					callbackContext.error("Failed to cancel.");
+				}
+			}
+		});
 
 		dialog.show();
 	}
@@ -234,11 +228,10 @@ public class DateTimePicker extends CordovaPlugin {
 		try {
 			JSONObject result = new JSONObject();
 			Date date = calendar.getTime();
-			// Provide the date in ISO 8601.
-			result.put("date", ISO8601.toString(date));
-			// Due to lack of browser/user agent support for ISO 8601 parsing, we also provide ticks since epoch.
+			// Due to lack of browser/user agent support for ISO 8601 parsing, we provide ticks since epoch.
 			// The Javascript date constructor works far more reliably this way, even on old JS engines.
 			result.put("ticks", date.getTime());
+			result.put("cancelled", false);
 			callbackContext.success(result);
 		}
 		catch (JSONException ex) {
@@ -274,7 +267,7 @@ public class DateTimePicker extends CordovaPlugin {
 				);
 			}
 			else {
-				mDatePickerPlugin.onCalendarSet(mCalendar, mCallbackContext);
+				onCalendarSet(mCalendar, mCallbackContext);
 			}
 		}
 	}
@@ -302,7 +295,7 @@ public class DateTimePicker extends CordovaPlugin {
 			mCalendar.set(Calendar.SECOND, 0);
 			mCalendar.set(Calendar.MILLISECOND, 0);
 
-			mDatePickerPlugin.onCalendarSet(mCalendar, mCallbackContext);
+			onCalendarSet(mCalendar, mCallbackContext);
 		}
 	}
 }

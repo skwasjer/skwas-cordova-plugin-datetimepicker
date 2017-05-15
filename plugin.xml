@@ -49,8 +49,8 @@ THE SOFTWARE.
         </config-file>
 
         <source-file src="src/android/DateTimePicker.java" target-dir="src/com/skwas/cordova/datetimepicker" />
-        <source-file src="src/android/DurationTimePickerDialog.java" target-dir="src/com/skwas/cordova/datetimepicker" />
-        <source-file src="src/android/ISO8601.java" target-dir="src/com/skwas/cordova/datetimepicker" />
+        <source-file src="src/android/DatePickerDialog.java" target-dir="src/com/skwas/cordova/datetimepicker" />
+        <source-file src="src/android/TimePickerDialog.java" target-dir="src/com/skwas/cordova/datetimepicker" />
     </platform>
 	
 	<!-- ios -->

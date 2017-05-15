@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 var argscheck = require('cordova/argscheck'),
-    utils = require('cordova/utils'),
-    exec = require('cordova/exec');
+	utils = require('cordova/utils'),
+	exec = require('cordova/exec');
 
 /**
  * This represents the DateTimePicker, and provides methods to show the native DateTime picker.
@@ -38,39 +38,36 @@ function DateTimePicker() {
  * @param {Function} successCallback The function to call when the datetime has changed.
  */
 DateTimePicker.prototype.show = function(options, successCallback, errorCallback) {
+	function noop() {};
+
 	function onPluginError(err) {
-		if (errorCallback)
-			errorCallback(err);
+		if (options.error !== noop)
+			options.error(err);
 		else
 			console.error("DatePickerPlugin: " + err);
 	};
 	
 	function onPluginSuccess(result) {
-		// The plugin expects the result to be either: 
-		// - a 64-bit int (ticks)
-		// - a string representing ticks (will be converted to int)
-		// - an object with either:
-		//     - "ticks": a 64-bit int (ticks)
-		//     - "date": an ISO 8601 datetime (depends on browser support however if it can be parsed).
-		
-		if (typeof result !== "undefined" && result != null) {
-			var dateInTicks;
+		// The plugin expects the result to be:
+		//
+		// {
+		//	 "result": {
+		//     "ticks": a 64-bit int (ticks),
+		//     "cancelled": true|false
+		//	 }
+		// }
+
+		if (typeof result !== "undefined" && result !== null) {
 			if (typeof result === "object") {
-				if (typeof result.ticks == "number")
-					dateInTicks = result.ticks;
-				else
-					dateInTicks = new Date(result.date).valueOf();
-			} else if (typeof result === "string")
-				dateInTicks = result * 1;
-			else
-				dateInTicks = result;
-		
-			if (typeof dateInTicks === "number") {
-				var resultDate = new Date(dateInTicks);
-				if (isDate(resultDate) && successCallback) {
-					successCallback(resultDate);
-					return;
+				if (result.cancelled === true) {
+					options.cancel();
+				} else if (typeof result.ticks === "number") {
+					var resultDate = new Date(result.ticks);
+					if (isDate(resultDate)) {
+						options.success(resultDate);
+					}
 				}
+				return;
 			}
 		}
 		onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
@@ -79,12 +76,20 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 	function isDate(val) {
 		return Object.prototype.toString.call(val) === "[object Date]" && !isNaN(val.getTime());
 	}
-	
+
+	function checkDate(obj, key, onError) {
+		if (!isDate(obj[key])) {
+			onError("The value " + obj[key] + " for " + key + " is invalid.");
+			return false;
+		}
+		return true;
+	}
+
 	var settings = {
 		mode: "date",
 		date: new Date(),
-		allowOldDates: true,
-		allowFutureDates: true,
+		allowOldDates: null,
+		allowFutureDates: null,
 		minuteInterval: 1,
 		locale: "EN",
 		okText: null,
@@ -92,7 +97,10 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		android: {
 			theme: undefined,	// If omitted/undefined, default theme will be used.
 			calendar: false	
-		}
+		},
+		success: undefined,
+		cancel: undefined,
+		error: undefined
 	};
 
 	// Copy options into settings overwriting the defaults.
@@ -100,17 +108,19 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		if (typeof options[key] !== "undefined")
 			settings[key] = options[key];
 	}
-	
-	// Check if date is valid.
-	if (!isDate(settings.date)) {
-		onPluginError("The date " + settings.date + "is invalid.");
+
+	// Set default callbacks if not set, or no function provided.
+	if (typeof options.success !== "function") options.success = successCallback || noop;
+	if (typeof options.cancel !== "function") options.cancel = noop;
+	if (typeof options.error !== "function") options.error = errorCallback || noop;
+
+	// Check if dates are valid and convert to ticks since epoch.
+	if (!checkDate(settings, "date", onPluginError)) {
 		return;
 	}
-	
-	// Also set the date in ticks since epoch.
 	settings.ticks = settings.date.valueOf();
 	
-    exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [settings]);
+	exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [settings]);
 };
 
 module.exports = new DateTimePicker();

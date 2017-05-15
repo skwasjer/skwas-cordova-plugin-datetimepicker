@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
@@ -13,7 +12,7 @@ import android.os.Bundle;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
 
-public class DurationTimePickerDialog extends TimePickerDialog
+public class TimePickerDialog extends android.app.TimePickerDialog
 {
 	TimePicker mTimePicker;
 	final OnTimeSetListener mCallback;
@@ -23,7 +22,7 @@ public class DurationTimePickerDialog extends TimePickerDialog
 	// In Honeycomb upwards, we have access to the time picker. In Lollipop, the time picker has changed to a radial picker, and we can't change the interval.
 	boolean mIsSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
-	public DurationTimePickerDialog(Context context, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int increment)
+	public TimePickerDialog(Context context, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int increment)
 	{
 		super(context, callBack, hourOfDay, minute, is24HourView);
 
@@ -34,7 +33,7 @@ public class DurationTimePickerDialog extends TimePickerDialog
 		mMinute = minute;
 	}
 
-	public DurationTimePickerDialog(Context context, int themeResId, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int increment)
+	public TimePickerDialog(Context context, int themeResId, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int increment)
 	{
 		super(context, themeResId, callBack, hourOfDay, minute, is24HourView);
 
@@ -47,14 +46,21 @@ public class DurationTimePickerDialog extends TimePickerDialog
 
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
-		if (mIsSupported && mCallback != null && mTimePicker != null) {
-			mTimePicker.clearFocus();
-			// Since M, getCurrentHour() and getCurrentMinute() are deprecated, but we won't get here as it is not supported by our code.
-			mCallback.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute() * mIncrement);
-		}
-		else {
-			super.onClick(dialog, which);
-		}
+        switch (which) {
+            case BUTTON_POSITIVE:
+                if (mIsSupported && mCallback != null && mTimePicker != null) {
+                    mTimePicker.clearFocus();
+                    // Since M, getCurrentHour() and getCurrentMinute() are deprecated, but we won't get here as it is not supported by our code.
+                    mCallback.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute() * mIncrement);
+                    return;
+                }
+                break;
+
+            case BUTTON_NEGATIVE:
+                cancel();
+                return;
+        }
+		super.onClick(dialog, which);
 	}
 
 	@Override
@@ -110,5 +116,13 @@ public class DurationTimePickerDialog extends TimePickerDialog
 		{
 			e.printStackTrace();
 		}
+	}
+
+	public void setOkText(String text) {
+		setButton(BUTTON_POSITIVE, text, this);
+	}
+
+	public void setCancelText(String text) {
+		setButton(BUTTON_NEGATIVE, text, this);
 	}
 }
