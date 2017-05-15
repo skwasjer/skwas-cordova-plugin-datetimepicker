@@ -1,10 +1,5 @@
 package com.skwas.cordova.datetimepicker;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
@@ -12,18 +7,20 @@ import android.os.Bundle;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
 
-public class TimePickerDialog extends android.app.TimePickerDialog
-{
-	TimePicker mTimePicker;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TimePickerDialog extends android.app.TimePickerDialog {
 	final OnTimeSetListener mCallback;
 	final int mIncrement;
 	final int mHourOfDay, mMinute;
-
+	TimePicker mTimePicker;
 	// In Honeycomb upwards, we have access to the time picker. In Lollipop, the time picker has changed to a radial picker, and we can't change the interval.
 	boolean mIsSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
-	public TimePickerDialog(Context context, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int increment)
-	{
+	public TimePickerDialog(Context context, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int increment) {
 		super(context, callBack, hourOfDay, minute, is24HourView);
 
 		mCallback = callBack;
@@ -33,8 +30,7 @@ public class TimePickerDialog extends android.app.TimePickerDialog
 		mMinute = minute;
 	}
 
-	public TimePickerDialog(Context context, int themeResId, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int increment)
-	{
+	public TimePickerDialog(Context context, int themeResId, OnTimeSetListener callBack, int hourOfDay, int minute, boolean is24HourView, int increment) {
 		super(context, themeResId, callBack, hourOfDay, minute, is24HourView);
 
 		mCallback = callBack;
@@ -46,20 +42,20 @@ public class TimePickerDialog extends android.app.TimePickerDialog
 
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
-        switch (which) {
-            case BUTTON_POSITIVE:
-                if (mIsSupported && mCallback != null && mTimePicker != null) {
-                    mTimePicker.clearFocus();
-                    // Since M, getCurrentHour() and getCurrentMinute() are deprecated, but we won't get here as it is not supported by our code.
-                    mCallback.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute() * mIncrement);
-                    return;
-                }
-                break;
+		switch (which) {
+			case BUTTON_POSITIVE:
+				if (mIsSupported && mCallback != null && mTimePicker != null) {
+					mTimePicker.clearFocus();
+					// Since M, getCurrentHour() and getCurrentMinute() are deprecated, but we won't get here as it is not supported by our code.
+					mCallback.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute() * mIncrement);
+					return;
+				}
+				break;
 
-            case BUTTON_NEGATIVE:
-                cancel();
-                return;
-        }
+			case BUTTON_NEGATIVE:
+				cancel();
+				return;
+		}
 		super.onClick(dialog, which);
 	}
 
@@ -69,21 +65,18 @@ public class TimePickerDialog extends android.app.TimePickerDialog
 	}
 
 	@Override
-	protected void onStop()
-	{
+	protected void onStop() {
 		// Do nothing.
 	}
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState)
-	{
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		// Ignore on SDK < 11.
 		if (!mIsSupported) return;
 
-		try
-		{
+		try {
 			Class<?> rClass = Class.forName("com.android.internal.R$id");
 			Field timePicker = rClass.getField("timePicker");
 			mTimePicker = (TimePicker)findViewById(timePicker.getInt(null));
@@ -101,19 +94,16 @@ public class TimePickerDialog extends android.app.TimePickerDialog
 			Method setDisplayedValues = mmsp.getMethod("setDisplayedValues", String[].class);
 
 			setMinValue.invoke(mMinuteSpinner, 0);
-			setMaxValue.invoke(mMinuteSpinner, (60/ mIncrement)-1);
+			setMaxValue.invoke(mMinuteSpinner, (60 / mIncrement) - 1);
 
 			List<String> displayedValues = new ArrayList<String>();
-			for(int i = 0; i < 60; i += mIncrement)
-			{
+			for (int i = 0; i < 60; i += mIncrement) {
 				displayedValues.add(String.format("%02d", i));
 			}
 
 			setDisplayedValues.invoke(mMinuteSpinner, (Object)displayedValues.toArray(new String[0]));
 			updateTime(mHourOfDay, mIsSupported ? mMinute / mIncrement : mMinute);
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
