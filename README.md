@@ -31,9 +31,9 @@ show(options, successCallback, errorCallback);
 | allowOldDates       | boolean             | true           | -                          | supported                  |
 | allowFutureDates    | boolean             | true           | -                          | supported                  |
 | minuteInterval      | int                 | 1              | >= Honeycomb               | supported                  |
-| locale              | String              | "EN"           | supported                  | supported                  |
+| locale              | String              | "EN"           | -                          | supported                  |
 | okText              | String              | "Select"       | supported                  | supported                  |
-| cancelText          | String              | "Cancel"       | -                          | supported                  |
+| cancelText          | String              | "Cancel"       | supported                  | supported                  |
 | android             | Object              | {}             | optional                   | ignored                    |
 
 #### Android options
