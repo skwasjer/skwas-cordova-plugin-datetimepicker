@@ -34,6 +34,8 @@ public class DateTimePicker extends CordovaPlugin {
 		@NonNull
 		public String mode = MODE_DATE;
 		public Date date = new Date();
+		public long minDate = 0;
+		public long maxDate = 0;
 		public boolean allowOldDates = true;
 		public boolean allowFutureDates = true;
 		public int minuteInterval = 1;
@@ -55,7 +57,9 @@ public class DateTimePicker extends CordovaPlugin {
 			mode = obj.optString("mode", mode);
 
 			date = new Date(obj.getLong("ticks"));
-			minuteInterval = obj.optInt("minuteInterval", 1);
+			minDate = obj.optLong("minDate", minDate);
+			maxDate = obj.optLong("maxDate", maxDate);
+			minuteInterval = obj.optInt("minuteInterval", minuteInterval);
 
 			allowOldDates = obj.optBoolean("allowOldDates", allowOldDates);
 			allowFutureDates = obj.optBoolean("allowFutureDates", allowFutureDates);
@@ -186,6 +190,14 @@ public class DateTimePicker extends CordovaPlugin {
 				dateDialog.setOkText(options.okText);
 				dateDialog.setCancelText(options.cancelText);
 				dateDialog.setCalendarEnabled(options.calendar);
+
+				DatePicker dp = dateDialog.getDatePicker();
+				if (options.minDate > 0) {
+					dp.setMinDate(options.minDate);
+				}
+				if (options.maxDate > 0 && options.maxDate > options.minDate) {
+					dp.setMaxDate(options.maxDate);
+				}
 
 				showDialog(dateDialog, callbackContext);
 			}
