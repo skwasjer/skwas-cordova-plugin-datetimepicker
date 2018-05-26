@@ -43,6 +43,8 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 	var settings = {
 		mode: "date",
 		date: new Date(),
+		minDate: null,
+		maxDate: null,
 		allowOldDates: null,
 		allowFutureDates: null,
 		minuteInterval: 1,
@@ -90,7 +92,7 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		}
 		onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
 	};
-	
+
 	function isDate(val) {
 		return Object.prototype.toString.call(val) === "[object Date]" && !isNaN(val.getTime());
 	}
@@ -119,7 +121,21 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		return;
 	}
 	settings.ticks = settings.date.valueOf();
-	
+
+	if (!!settings.minDate) {
+		if (!checkDate(settings, "minDate", onPluginError)) {
+			return;
+		}
+		settings.minDate = settings.minDate.valueOf();
+	}
+
+	if (!!settings.maxDate) {
+		if (!checkDate(settings, "maxDate", onPluginError)) {
+			return;
+		}
+		settings.maxDate = settings.maxDate.valueOf();
+	}
+
 	exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [settings]);
 };
 

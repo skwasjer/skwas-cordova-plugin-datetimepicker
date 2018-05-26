@@ -13,20 +13,20 @@ or for latest
 
 ## Supported platforms ##
 
-Android 4 and higher  
+Android 4 and higher
 iOS 8 and higher (tested with Xcode 7.2.3 and Xcode 8)
 
 ## Methods ##
 
 ### show ###
 
-`show(options)`  
-Show the plugin with specified options. 
+`show(options)`
+Show the plugin with specified options.
 
-`show(options, successCallback, errorCallback)`  
+`show(options, successCallback, errorCallback)`
 Show the plugin with specified options and callbacks.
 
-This was the original way to call the plugin, and is kept for compatibility. 
+This was the original way to call the plugin, and is kept for compatibility.
 > Note: The `successCallback` and `errorCallback` respectively will be ignored if the `success` or `error` callback is provided on the `options` argument.
 
 #### Options ####
@@ -37,6 +37,8 @@ This was the original way to call the plugin, and is kept for compatibility.
 | date                | Date                |                | required                   | required                   | The initial date to display |
 | allowOldDates       | boolean             | true           | -                          | supported                  | Allow older dates to be selected |
 | allowFutureDates    | boolean             | true           | -                          | supported                  | Allow future dates to be selected |
+| minDate					    | Date	              |  		           | supported                  | supported                  | Set the minimum date that can be selected |
+| maxDate					    | Date                | 		           | supported                  | supported                  | Set the maximum date that can be selected |
 | minuteInterval      | int                 | 1              | >= Honeycomb               | supported                  | For minute spinner the number of minutes per step |
 | locale              | String              | "EN"           | -                          | supported                  | The locale to use for text and date/time |
 | okText              | String              | "Select"       | supported                  | supported                  | The text to use for the ok button |
@@ -69,6 +71,8 @@ function onDeviceReady() {
 		date: myDate,
 		allowOldDates: true,
 		allowFutureDates: true,
+		minDate: new Date(),
+		maxDate: null,
 		minuteInterval: 15,
 		locale: "EN",
 		okText: "Select",
