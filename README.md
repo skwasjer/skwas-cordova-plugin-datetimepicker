@@ -13,17 +13,17 @@ or for latest
 
 ## Supported platforms ##
 
-Android 4 and higher
-iOS 8 and higher (tested with Xcode 7.2.3 and Xcode 8)
+- Android 4 and higher
+- iOS 8 and higher (tested with Xcode 7.2.3 and Xcode 8)
 
 ## Methods ##
 
 ### show ###
 
-`show(options)`
+`show(options)`  
 Show the plugin with specified options.
 
-`show(options, successCallback, errorCallback)`
+`show(options, successCallback, errorCallback)`  
 Show the plugin with specified options and callbacks.
 
 This was the original way to call the plugin, and is kept for compatibility.
@@ -33,12 +33,12 @@ This was the original way to call the plugin, and is kept for compatibility.
 
 | Name                | Type                | Default        | Android                    | iOS                        | |
 |---------------------|---------------------|----------------|:--------------------------:|:--------------------------:|--------------------------|
-| mode                | String              | "date"         | `date`, `time`, `datetime` | `date`, `time`, `datetime` | The display mode |
+| mode                | String              | `date`         | `date`, `time`, `datetime` | `date`, `time`, `datetime` | The display mode |
 | date                | Date                |                | required                   | required                   | The initial date to display |
 | allowOldDates       | boolean             | true           | -                          | supported                  | Allow older dates to be selected |
 | allowFutureDates    | boolean             | true           | -                          | supported                  | Allow future dates to be selected |
-| minDate					    | Date	              |  		           | supported                  | supported                  | Set the minimum date that can be selected |
-| maxDate					    | Date                | 		           | supported                  | supported                  | Set the maximum date that can be selected |
+| minDate             | Date                |                | supported                  | supported                  | Set the minimum date that can be selected |
+| maxDate             | Date                |                | supported                  | supported                  | Set the maximum date that can be selected |
 | minuteInterval      | int                 | 1              | >= Honeycomb               | supported                  | For minute spinner the number of minutes per step |
 | locale              | String              | "EN"           | -                          | supported                  | The locale to use for text and date/time |
 | okText              | String              | "Select"       | supported                  | supported                  | The text to use for the ok button |
@@ -53,7 +53,7 @@ This was the original way to call the plugin, and is kept for compatibility.
 | Name                | Type                | Default     | Description               |
 |---------------------|---------------------|-------------|---------------------------|
 | theme               | int                 | [Theme_DeviceDefault_Dialog](https://developer.android.com/reference/android/R.style.html#Theme_DeviceDefault_Dialog)| android.R.style theme |
-| calendar            | boolean             | false       | False shows spinners, however this depend on the theme selected and SDK version. When true, forces a calendar view.|
+| calendar            | boolean             | false       | `false` shows spinners, however this depend on the theme selected and SDK version. When `true`, forces a calendar view.|
 | is24HourView        | boolean             | true        | Use a 24 hour clock |
 
 > On Lollipop and upwards the date and time pickers changed to calendar and radial pickers. If you want to use spinners (for example to use `minuteInterval`), choose a theme that shows a date and time picker with spinners, like Theme_DeviceDefault_Light, Theme_Holo_Dialog or the traditional theme (1).
@@ -101,6 +101,10 @@ function onDeviceReady() {
 
 ## Changelog
 
+#### 1.1.0 ####
+- Android/iOS: add support for min and max date settings
+- Add type information for Typescript support
+
 #### 1.0.0 ####
 
 - Android/iOS: add support for cancel-event
@@ -139,9 +143,11 @@ function onDeviceReady() {
 
 #### 0.5.0 ####
 
-- rename repo to conform to npm/cordova plugin naming convention
+- Rename repo to conform to npm/cordova plugin naming convention
 
 ### Contributors ###
 
+- [skwasjer](https://github.com/skwasjer)
 - [turshija](https://github.com/turshija)
 - [emanfu](https://github.com/emanfu)
+- [masimplo](https://github.com/masimplo)
