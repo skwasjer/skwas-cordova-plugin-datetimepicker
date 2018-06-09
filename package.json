@@ -3,7 +3,7 @@
     "name": "skwas-cordova-plugin-datetimepicker",
     "cordova_name": "DateTime picker",
     "description": "Cordova DateTime picker plugin",
-    "license": "MIT",
+    "types": "./types/index.d.ts",
     "repository": {
         "type" : "git",
         "url" : "https://github.com/skwasjer/skwas-cordova-plugin-datetimepicker.git"
@@ -20,6 +20,7 @@
         "ios"
     ],
     "engines": [],
+    "license": "MIT",
     "author": "skwasjer",
     "contributors": [
         "turshija",
