@@ -123,8 +123,8 @@
 {
     NSString *mode = [optionsOrNil objectForKey:@"mode"];
     long long ticks = [[optionsOrNil objectForKey:@"ticks"] longLongValue];
-    long long minDate = [[optionsOrNil objectForKey:@"minDate"] longLongValue];
-    long long maxDate = [[optionsOrNil objectForKey:@"maxDate"] longLongValue];
+    NSNumber *minDate = [optionsOrNil objectForKey:@"minDate"];
+    NSNumber *maxDate = [optionsOrNil objectForKey:@"maxDate"];
     NSString *localeString = [optionsOrNil objectForKey:@"locale"];
     NSString *okTextString = [optionsOrNil objectForKey:@"okText"];
     NSString *cancelTextString = [optionsOrNil objectForKey:@"cancelText"];
@@ -144,8 +144,8 @@
     if (!allowOldDates) datePicker.minimumDate = [NSDate date];
     if (!allowFutureDates) datePicker.maximumDate = [NSDate date];
     
-    if (minDate) datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:(minDate / 1000)];
-    if (maxDate && maxDate > minDate) datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:(maxDate / 1000)];
+    if (minDate) datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:([minDate longLongValue] / 1000)];
+    if (maxDate && maxDate > minDate) datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:([maxDate longLongValue] / 1000)];
     
     if ([mode isEqualToString:@"date"])
         datePicker.datePickerMode = UIDatePickerModeDate;
