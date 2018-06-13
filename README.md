@@ -101,6 +101,10 @@ function onDeviceReady() {
 
 ## Changelog
 
+#### 1.1.1 ####
+- iOS: fix null reference exception when `minDate` or  `maxDate` was not specified
+- iOS: fix `maxDate` not being set when `minDate` was not specified
+
 #### 1.1.0 ####
 - Android/iOS: add support for min and max date settings
 - Add type information for Typescript support
