@@ -145,7 +145,7 @@
     if (!allowFutureDates) datePicker.maximumDate = [NSDate date];
     
     if (minDate) datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:([minDate longLongValue] / 1000)];
-    if (maxDate && maxDate > minDate) datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:([maxDate longLongValue] / 1000)];
+    if (maxDate && (!minDate || maxDate > minDate)) datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:([maxDate longLongValue] / 1000)];
     
     if ([mode isEqualToString:@"date"])
         datePicker.datePickerMode = UIDatePickerModeDate;
