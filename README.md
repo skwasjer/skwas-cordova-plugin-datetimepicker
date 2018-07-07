@@ -36,17 +36,17 @@ This was the original way to call the plugin, and is kept for compatibility.
 |---------------------|---------------------|----------------|:--------------------------:|:--------------------------:|--------------------------|
 | mode                | String              | `date`         | `date`, `time`, `datetime` | `date`, `time`, `datetime` | The display mode |
 | date                | Date                |                | required                   | required                   | The initial date to display |
-| allowOldDates       | boolean             | true           | supported                  | supported                  | Allow older dates to be selected |
-| allowFutureDates    | boolean             | true           | supported                  | supported                  | Allow future dates to be selected |
-| minDate             | Date                |                | supported                  | supported                  | Set the minimum date that can be selected |
-| maxDate             | Date                |                | supported                  | supported                  | Set the maximum date that can be selected |
-| minuteInterval      | int                 | 1              | >= Honeycomb               | supported                  | For minute spinner the number of minutes per step |
-| locale              | String              | "EN"           | -                          | supported                  | The locale to use for text and date/time |
-| okText              | String              | "Select"       | supported                  | supported                  | The text to use for the ok button |
-| cancelText          | String              | "Cancel"       | supported                  | supported                  | The text to use for the cancel button |
-| success             | Function            | -              | supported                  | supported                  | The success callback |
-| cancel              | Function            | -              | supported                  | supported                  | The cancel callback |
-| error               | Function            | -              | supported                  | supported                  | The error callback |
+| allowOldDates       | boolean             | true           | ![Supported][supported]    | ![Supported][supported]    | Allow older dates to be selected |
+| allowFutureDates    | boolean             | true           | ![Supported][supported]    | ![Supported][supported]    | Allow future dates to be selected |
+| minDate             | Date                |                | ![Supported][supported]    | ![Supported][supported]    | Set the minimum date that can be selected |
+| maxDate             | Date                |                | ![Supported][supported]    | ![Supported][supported]    | Set the maximum date that can be selected |
+| minuteInterval      | int                 | 1              | >= Honeycomb               | ![Supported][supported]    | For minute spinner the number of minutes per step |
+| locale              | String              | "EN"           | -                          | ![Supported][supported]    | The locale to use for text and date/time |
+| okText              | String              | "Select"       | ![Supported][supported]    | ![Supported][supported]    | The text to use for the ok button |
+| cancelText          | String              | "Cancel"       | ![Supported][supported]    | ![Supported][supported]    | The text to use for the cancel button |
+| success             | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The success callback |
+| cancel              | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The cancel callback |
+| error               | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The error callback |
 | android             | Object              | {}             | optional                   | ignored                    | Android specific options |
 
 #### Android options
@@ -111,3 +111,7 @@ For a list of all changes  [see here](./CHANGELOG.md).
 - [turshija](https://github.com/turshija)
 - [emanfu](https://github.com/emanfu)
 - [masimplo](https://github.com/masimplo)
+
+
+[supported]: ./docs/res/check.svg "Supported"
+[not-supported]: ./doc/res/close.svg "Not supported"
