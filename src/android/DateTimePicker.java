@@ -102,7 +102,7 @@ public class DateTimePicker extends CordovaPlugin {
 	}
 
 	@Override
-	public synchronized boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+	public synchronized boolean execute(String action, JSONArray args, final CallbackContext callbackContext) {
 		Log.d(TAG, "DateTimePicker called with options: " + args);
 
 		switch (action) {
