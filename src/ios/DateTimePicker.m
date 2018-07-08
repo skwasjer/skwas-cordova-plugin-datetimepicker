@@ -30,7 +30,11 @@
 
 - (void)show:(CDVInvokedUrlCommand*)command
 {
-    if (isVisible) return;
+    if (isVisible) {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ILLEGAL_ACCESS_EXCEPTION messageAsString:@"A date/time picker dialog is already showing."];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
     
     self.callbackId = command.callbackId;
     
@@ -42,6 +46,19 @@
     [self.viewController presentViewController:self.modalPicker animated:YES completion:nil];
     
     isVisible = YES;
+}
+
+- (void)hide:(CDVInvokedUrlCommand*)command
+{
+    if (isVisible) {
+        // Hide the view with our custom transition.
+        [self.modalPicker dismissViewControllerAnimated:true completion:nil];
+        [self callbackCancelWithJavascript];
+        isVisible = NO;
+    }
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)onMemoryWarning
