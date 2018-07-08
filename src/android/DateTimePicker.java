@@ -3,6 +3,7 @@ package com.skwas.cordova.datetimepicker;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.app.Dialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
@@ -15,6 +16,7 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,6 +91,8 @@ public class DateTimePicker extends CordovaPlugin {
 	private static final String TAG = "DateTimePicker";
 
 	private Activity _activity;
+	private volatile Runnable _runnable;
+	private volatile Dialog _dialog;
 
 	@Override
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -98,14 +102,19 @@ public class DateTimePicker extends CordovaPlugin {
 	}
 
 	@Override
-	public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+	public synchronized boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
 		Log.d(TAG, "DateTimePicker called with options: " + args);
 
-		if (action.equals("show")) {
-			show(args, callbackContext);
-			return true;
+		switch (action) {
+			case "show":
+				show(args, callbackContext);
+				return true;
+			case "hide":
+				hide(args, callbackContext);
+				return true;
+			default:
+				return false;
 		}
-		return false;
 	}
 
 	/**
@@ -116,7 +125,16 @@ public class DateTimePicker extends CordovaPlugin {
 	 * @return true when the dialog is shown
 	 */
 	public synchronized boolean show(final JSONArray data, final CallbackContext callbackContext) {
-		final Runnable runnable;
+		if (_runnable != null) {
+			callbackContext.sendPluginResult(
+					new PluginResult(
+							PluginResult.Status.ILLEGAL_ACCESS_EXCEPTION,
+							"A date/time picker dialog is already showing."
+					)
+			);
+			return false;
+		}
+
 		final DateTimePicker datePickerPlugin = this;
 		final DateTimePickerOptions options;
 
@@ -138,15 +156,32 @@ public class DateTimePicker extends CordovaPlugin {
 		calendar.setTime(options.date);
 
 		if (MODE_TIME.equalsIgnoreCase(options.mode)) {
-			runnable = showTimeDialog(datePickerPlugin, callbackContext, options, calendar);
+			_runnable = showTimeDialog(datePickerPlugin, callbackContext, options, calendar);
 		} else if (MODE_DATE.equalsIgnoreCase(options.mode) || MODE_DATETIME.equalsIgnoreCase(options.mode)) {
-			runnable = showDateDialog(datePickerPlugin, callbackContext, options, calendar);
+			_runnable = showDateDialog(datePickerPlugin, callbackContext, options, calendar);
 		} else {
 			callbackContext.error("Unknown mode. Only 'date', 'time' and 'datetime' are valid modes.");
 			return false;
 		}
 
-		_activity.runOnUiThread(runnable);
+		_activity.runOnUiThread(_runnable);
+		return true;
+	}
+
+	/**
+	 * Plugin 'hide' method.
+	 *
+	 * @param data The JSON arguments passed to the method.
+	 * @param callbackContext The callback context.
+	 * @return always returns true.
+	 */
+	public synchronized boolean hide(final JSONArray data, final CallbackContext callbackContext) {
+		if (_runnable != null && _dialog != null) {
+			_dialog.cancel();
+			_dialog = null;
+		}
+
+		callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.NO_RESULT));
 		return true;
 	}
 
@@ -210,7 +245,7 @@ public class DateTimePicker extends CordovaPlugin {
 	 * @param dialog The dialog to show.
 	 * @param callbackContext The callback context.
 	 */
-	private static void showDialog(final AlertDialog dialog, final CallbackContext callbackContext) {
+	private synchronized void showDialog(final AlertDialog dialog, final CallbackContext callbackContext) {
 		dialog.setCancelable(true);
 		dialog.setCanceledOnTouchOutside(false);
 
@@ -224,9 +259,13 @@ public class DateTimePicker extends CordovaPlugin {
 				} catch (JSONException ex) {
 					callbackContext.error("Failed to cancel.");
 				}
+				finally {
+					_runnable = null;
+				}
 			}
 		});
 
+		_dialog = dialog;
 		dialog.show();
 	}
 
@@ -236,7 +275,7 @@ public class DateTimePicker extends CordovaPlugin {
 	 * @param calendar The calendar with the new date and/or time.
 	 * @param callbackContext The callback context.
 	 */
-	private static void onCalendarSet(Calendar calendar, CallbackContext callbackContext) {
+	private synchronized void onCalendarSet(Calendar calendar, CallbackContext callbackContext) {
 		try {
 			JSONObject result = new JSONObject();
 			Date date = calendar.getTime();
@@ -247,6 +286,9 @@ public class DateTimePicker extends CordovaPlugin {
 			callbackContext.success(result);
 		} catch (JSONException ex) {
 			callbackContext.error("Failed to serialize date. " + calendar.getTime().toString());
+		}
+		finally {
+			_runnable = null;
 		}
 	}
 
@@ -273,9 +315,11 @@ public class DateTimePicker extends CordovaPlugin {
 			mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
 			if (MODE_DATETIME.equalsIgnoreCase(mOptions.mode)) {
-				_activity.runOnUiThread(
-						showTimeDialog(mDatePickerPlugin, mCallbackContext, mOptions, mCalendar)
-				);
+				synchronized(mDatePickerPlugin) {
+					_activity.runOnUiThread(
+							_runnable = showTimeDialog(mDatePickerPlugin, mCallbackContext, mOptions, mCalendar)
+					);
+				}
 			} else {
 				onCalendarSet(mCalendar, mCallbackContext);
 			}

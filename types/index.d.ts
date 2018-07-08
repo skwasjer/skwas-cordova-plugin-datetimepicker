@@ -31,7 +31,7 @@ interface IDatePickerOptions {
 interface DateTimePicker {
 
   /**
-   * Show the plugin with specified options.
+   * Show the date/time picker with specified options.
    *
    * @param {IDatePickerOptions} options
    * @memberof DateTimePicker
@@ -39,7 +39,7 @@ interface DateTimePicker {
   show(options: IDatePickerOptions): void;
 
   /**
-   * Show the plugin with specified options and callbacks.
+   * Show the date/time picker with specified options and callbacks.
    * Legacy way to call the show method, kept for backward compatibility.
    * NOTE: The successCallback and errorCallback respectively will be ignored if the success or error callback is provided on the options argument.
    *
@@ -49,4 +49,14 @@ interface DateTimePicker {
    * @memberof DateTimePicker
    */
   show(options: IDatePickerOptions, successCb: (newDate: Date) => void, errorCb: (err: Error) => void): void;
+  
+  /**
+   * Hide the date/time picker.
+   *
+   * If the picker is currently being shown and a cancel-callback is provided
+   * in the options, the callback will be called when the picker is hidden.
+   *
+   * @memberof DateTimePicker
+   */
+  hide(): void;
 }
