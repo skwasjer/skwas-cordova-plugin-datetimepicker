@@ -14,7 +14,7 @@ or for latest
 ## Supported platforms ##
 
 - Android 4 and higher
-- iOS 8 and higher (tested with Xcode 7.2.3 and Xcode 8)
+- iOS 8 and higher (tested with Xcode 7.2.3, Xcode 8 and Xcode 9.2)
 
 ## Methods ##
 
@@ -100,6 +100,9 @@ function onDeviceReady() {
 > Note that not all options have to be set.
 
 ## Changelog
+
+#### 1.1.2 ####
+- iOS: fix bug when `minDate` or `maxDate` was NSNull would cause exception.
 
 #### 1.1.1 ####
 - iOS: fix null reference exception when `minDate` or  `maxDate` was not specified

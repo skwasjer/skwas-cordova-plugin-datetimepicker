@@ -144,8 +144,12 @@
     if (!allowOldDates) datePicker.minimumDate = [NSDate date];
     if (!allowFutureDates) datePicker.maximumDate = [NSDate date];
     
-    if (minDate) datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:([minDate longLongValue] / 1000)];
-    if (maxDate && (!minDate || maxDate > minDate)) datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:([maxDate longLongValue] / 1000)];
+    if (minDate != nil && minDate != (id)[NSNull null]) {
+        datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:([minDate longLongValue] / 1000)];
+    }
+    if (maxDate != nil && maxDate != (id)[NSNull null] && (!(minDate != nil && minDate != (id)[NSNull null]) || maxDate > minDate)) {
+        datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:([maxDate longLongValue] / 1000)];
+    }
     
     if ([mode isEqualToString:@"date"])
         datePicker.datePickerMode = UIDatePickerModeDate;
