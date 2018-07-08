@@ -79,10 +79,10 @@ public class TimePickerDialog extends android.app.TimePickerDialog {
 		try {
 			Class<?> rClass = Class.forName("com.android.internal.R$id");
 			Field timePicker = rClass.getField("timePicker");
-			mTimePicker = (TimePicker)findViewById(timePicker.getInt(null));
+			mTimePicker = (TimePicker) findViewById(timePicker.getInt(null));
 			Field m = rClass.getField("minute");
 
-			NumberPicker mMinuteSpinner = (NumberPicker)mTimePicker.findViewById(m.getInt(null));
+			NumberPicker mMinuteSpinner = (NumberPicker) mTimePicker.findViewById(m.getInt(null));
 			if (mMinuteSpinner == null) {
 				mTimePicker = null;
 				mIsSupported = false;
@@ -101,7 +101,7 @@ public class TimePickerDialog extends android.app.TimePickerDialog {
 				displayedValues.add(String.format("%02d", i));
 			}
 
-			setDisplayedValues.invoke(mMinuteSpinner, (Object)displayedValues.toArray(new String[0]));
+			setDisplayedValues.invoke(mMinuteSpinner, (Object) displayedValues.toArray(new String[0]));
 			updateTime(mHourOfDay, mIsSupported ? mMinute / mIncrement : mMinute);
 		} catch (Exception e) {
 			e.printStackTrace();

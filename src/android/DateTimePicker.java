@@ -29,7 +29,6 @@ public class DateTimePicker extends CordovaPlugin {
 
 	/**
 	 * Options for date picker.
-	 *
 	 * Note that not all options are supported, they are here to match the options across all platforms.
 	 */
 	private class DateTimePickerOptions {
@@ -120,7 +119,7 @@ public class DateTimePicker extends CordovaPlugin {
 	/**
 	 * Plugin 'show' method.
 	 *
-	 * @param data The JSON arguments passed to the method.
+	 * @param data            The JSON arguments passed to the method.
 	 * @param callbackContext The callback context.
 	 * @return true when the dialog is shown
 	 */
@@ -171,7 +170,7 @@ public class DateTimePicker extends CordovaPlugin {
 	/**
 	 * Plugin 'hide' method.
 	 *
-	 * @param data The JSON arguments passed to the method.
+	 * @param data            The JSON arguments passed to the method.
 	 * @param callbackContext The callback context.
 	 * @return always returns true.
 	 */
@@ -242,7 +241,7 @@ public class DateTimePicker extends CordovaPlugin {
 	/**
 	 * Show the picker dialog.
 	 *
-	 * @param dialog The dialog to show.
+	 * @param dialog          The dialog to show.
 	 * @param callbackContext The callback context.
 	 */
 	private synchronized void showDialog(final AlertDialog dialog, final CallbackContext callbackContext) {
@@ -258,8 +257,7 @@ public class DateTimePicker extends CordovaPlugin {
 					callbackContext.success(result);
 				} catch (JSONException ex) {
 					callbackContext.error("Failed to cancel.");
-				}
-				finally {
+				} finally {
 					_runnable = null;
 				}
 			}
@@ -272,7 +270,7 @@ public class DateTimePicker extends CordovaPlugin {
 	/**
 	 * Success callback for when a new date or time is set.
 	 *
-	 * @param calendar The calendar with the new date and/or time.
+	 * @param calendar        The calendar with the new date and/or time.
 	 * @param callbackContext The callback context.
 	 */
 	private synchronized void onCalendarSet(Calendar calendar, CallbackContext callbackContext) {
@@ -286,8 +284,7 @@ public class DateTimePicker extends CordovaPlugin {
 			callbackContext.success(result);
 		} catch (JSONException ex) {
 			callbackContext.error("Failed to serialize date. " + calendar.getTime().toString());
-		}
-		finally {
+		} finally {
 			_runnable = null;
 		}
 	}
@@ -315,7 +312,7 @@ public class DateTimePicker extends CordovaPlugin {
 			mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
 			if (MODE_DATETIME.equalsIgnoreCase(mOptions.mode)) {
-				synchronized(mDatePickerPlugin) {
+				synchronized (mDatePickerPlugin) {
 					_activity.runOnUiThread(
 							_runnable = showTimeDialog(mDatePickerPlugin, mCallbackContext, mOptions, mCalendar)
 					);

@@ -27,7 +27,7 @@ var utils = require('cordova/utils'),
 var modeRegex = /(date|time|datetime)/i,
 	isValidMode = modeRegex.test.bind(modeRegex);
 
-function noop() {};
+function noop() { };
 
 function isDate(val) {
 	return Object.prototype.toString.call(val) === "[object Date]" && !isNaN(val.getTime());

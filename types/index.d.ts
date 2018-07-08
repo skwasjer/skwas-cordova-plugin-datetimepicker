@@ -49,7 +49,7 @@ interface DateTimePicker {
    * @memberof DateTimePicker
    */
   show(options: IDatePickerOptions, successCb: (newDate: Date) => void, errorCb: (err: Error) => void): void;
-  
+
   /**
    * Hide the date/time picker.
    *
