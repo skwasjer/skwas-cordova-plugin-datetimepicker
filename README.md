@@ -53,10 +53,10 @@ This was the original way to call the plugin, and is kept for compatibility.
 | Name                | Type                | Default     | Description               |
 |---------------------|---------------------|-------------|---------------------------|
 | theme               | int                 | [Theme_DeviceDefault_Dialog](https://developer.android.com/reference/android/R.style.html#Theme_DeviceDefault_Dialog)| android.R.style theme |
-| calendar            | boolean             | false       | `false` shows spinners, however this depend on the theme selected and SDK version. When `true`, forces a calendar view.|
+| calendar (obsolete) | boolean             | false       | `false` shows spinners, however this depend on the theme selected and SDK version. When `true`, forces a calendar view.|
 | is24HourView        | boolean             | true        | Use a 24 hour clock |
 
-> On Lollipop and upwards the date and time pickers changed to calendar and radial pickers. If you want to use spinners (for example to use `minuteInterval`), choose a theme that shows a date and time picker with spinners, like Theme_DeviceDefault_Light, Theme_Holo_Dialog or the traditional theme (1).
+> On Lollipop and upwards the date and time pickers changed to calendar and radial pickers. If you want to use spinners (for example to use `minuteInterval`), use a built-in [android.R.style](https://developer.android.com/reference/android/R.style.html) theme that shows a date and time picker with spinners or read up here [how to customize this](./docs/Android_custom_theme_and_styling.md).
 
 #### Example ####
 
