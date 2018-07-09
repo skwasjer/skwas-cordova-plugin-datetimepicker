@@ -40,6 +40,10 @@ So let's do it the proper way!
   </resources>
   ```
 
+In this example theme:
+- we defined a theme named `MyAppTheme` which we will apply to the Android activity later on.
+- we defined two custom styles for the date and time picker widget, with an attribute `datePickerMode` and `timePickerMode` both set to `spinner`. This should change the pickers from radials into spinners.
+
 ## Applying the theme
 
 - Open the `config.xml` in the Cordova project root.
@@ -57,11 +61,11 @@ So let's do it the proper way!
   </widget>
   ```
 
-Let's break it down what is happening:
+Let's break down what is happening:
 
 #### Platform specific configuration
 
-The `platform` element allows up to specify configuration that is specific for a platform, in this case Android.
+The `platform` element allows us configure the Android platform specifically, as this does not apply to `iOS` or others.
 
 ```xml
 <platform name="android">
