@@ -62,7 +62,8 @@ function isNumber(value) {
 }
 
 function isMinuteInterval(i) {
-	return isNumber(i) && i >= 1 && i <= 30 && (60 % i === 0);
+	i = parseInt(i)
+	return isNumber(i) && !isNaN(i) && i >= 1 && i <= 30 && (60 % i === 0);
 }
 
 /**
