@@ -47,6 +47,10 @@ In this example theme:
 ## Applying the theme
 
 - Open the `config.xml` in the Cordova project root.
+- Add the Android schema with a namespace declaration to the `widget` element if it isn't already there:
+  ```xml
+  <widget ... xmlns:android="http://schemas.android.com/apk/res/android">
+  ```
 - Add the following XML to the `widget` element:
   ```xml
   <widget ...>
