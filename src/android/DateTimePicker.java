@@ -32,11 +32,14 @@ public class DateTimePicker extends CordovaPlugin {
 	 * Note that not all options are supported, they are here to match the options across all platforms.
 	 */
 	private class DateTimePickerOptions {
+		private static final long DATE_OBJ_MAX = 8640000000000000L;
+		private static final long DATE_OBJ_MIN = -DATE_OBJ_MAX;
+
 		@NonNull
 		public String mode = MODE_DATE;
 		public Date date = new Date();
-		public long minDate = 0;
-		public long maxDate = 0;
+		public Date minDate;
+		public Date maxDate;
 		public boolean allowOldDates = true;
 		public boolean allowFutureDates = true;
 		public int minuteInterval = 1;
@@ -55,15 +58,22 @@ public class DateTimePicker extends CordovaPlugin {
 		public DateTimePickerOptions(JSONObject obj) throws JSONException {
 			this();
 
+			long nowTicks = date.getTime();
+
 			mode = obj.optString("mode", mode);
 
 			date = new Date(obj.getLong("ticks"));
-			minDate = obj.optLong("minDate", minDate);
-			maxDate = obj.optLong("maxDate", maxDate);
-			minuteInterval = obj.optInt("minuteInterval", minuteInterval);
 
 			allowOldDates = obj.optBoolean("allowOldDates", allowOldDates);
 			allowFutureDates = obj.optBoolean("allowFutureDates", allowFutureDates);
+
+			minDate = new Date(obj.optLong("minDateTicks", allowOldDates ? DATE_OBJ_MIN : nowTicks));
+			maxDate = new Date(obj.optLong("maxDateTicks", allowFutureDates ? DATE_OBJ_MAX : nowTicks));
+			if (minDate.compareTo(maxDate) > 0) {
+				minDate = new Date(DATE_OBJ_MIN);
+			}
+
+			minuteInterval = obj.optInt("minuteInterval", minuteInterval);
 
 			if (!obj.isNull("okText")) {
 				okText = obj.optString("okText");
@@ -226,12 +236,9 @@ public class DateTimePicker extends CordovaPlugin {
 				dateDialog.setCalendarEnabled(options.calendar);
 
 				DatePicker dp = dateDialog.getDatePicker();
-				if (options.minDate > 0) {
-					dp.setMinDate(options.minDate);
-				}
-				if (options.maxDate > 0 && options.maxDate > options.minDate) {
-					dp.setMaxDate(options.maxDate);
-				}
+
+				dp.setMinDate(options.minDate.getTime());
+				dp.setMaxDate(options.maxDate.getTime());
 
 				showDialog(dateDialog, callbackContext);
 			}

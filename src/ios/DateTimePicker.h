@@ -2,10 +2,11 @@
 #import <Cordova/CDVPlugin.h>
 #import "ModalPickerViewController.h"
 
-#ifndef k_DATEPICKER_DATETIME_FORMAT
-#define k_DATEPICKER_DATETIME_FORMAT @"yyyy-MM-dd'T'HH:mm:ss'Z'"
-#endif
-
+enum DTPDateBounds {
+    DDBMinDate = -8640000000000000,
+    DDBMaxDate = 8640000000000000,
+    DDBIntervalFactor = 1000
+};
 
 @interface DateTimePicker : CDVPlugin <UIViewControllerTransitioningDelegate> {
    

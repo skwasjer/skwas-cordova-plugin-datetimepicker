@@ -140,13 +140,14 @@
 {
     NSString *mode = [optionsOrNil objectForKey:@"mode"];
     long long ticks = [[optionsOrNil objectForKey:@"ticks"] longLongValue];
-    NSNumber *minDate = [optionsOrNil objectForKey:@"minDate"];
-    NSNumber *maxDate = [optionsOrNil objectForKey:@"maxDate"];
     NSString *localeString = [optionsOrNil objectForKey:@"locale"];
     NSString *okTextString = [optionsOrNil objectForKey:@"okText"];
     NSString *cancelTextString = [optionsOrNil objectForKey:@"cancelText"];
     BOOL allowOldDates = [[optionsOrNil objectForKey:@"allowOldDates"] intValue] == 1 ? YES : NO;
     BOOL allowFutureDates = [[optionsOrNil objectForKey:@"allowFutureDates"] intValue] == 1 ? YES : NO;
+    long long nowTicks = ((long long)[[NSDate date] timeIntervalSince1970]) * DDBIntervalFactor;
+    long long minDateTicks = [[optionsOrNil objectForKey:@"minDateTicks"] ?: [NSNumber numberWithLong:(allowOldDates ? DDBMinDate : nowTicks)] longLongValue];
+    long long maxDateTicks = [[optionsOrNil objectForKey:@"maxDateTicks"] ?: [NSNumber numberWithLong:(allowFutureDates ? DDBMaxDate : nowTicks)] longLongValue];
     NSInteger minuteInterval = [[optionsOrNil objectForKey:@"minuteInterval"] intValue];
 
     if (localeString == nil || localeString.length == 0) localeString = @"EN";
@@ -158,15 +159,12 @@
     self.modalPicker.dismissText = okTextString;
     self.modalPicker.cancelText = cancelTextString;
 
-    if (!allowOldDates) datePicker.minimumDate = [NSDate date];
-    if (!allowFutureDates) datePicker.maximumDate = [NSDate date];
-
-    if (minDate != nil && minDate != (id)[NSNull null]) {
-        datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:([minDate longLongValue] / 1000)];
+    if (minDateTicks > maxDateTicks)
+    {
+        minDateTicks = DDBMinDate;
     }
-    if (maxDate != nil && maxDate != (id)[NSNull null] && (!(minDate != nil && minDate != (id)[NSNull null]) || maxDate > minDate)) {
-        datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:([maxDate longLongValue] / 1000)];
-    }
+    datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:(minDateTicks / DDBIntervalFactor)];
+    datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:(maxDateTicks / DDBIntervalFactor)];
 
     if ([mode isEqualToString:@"date"])
         datePicker.datePickerMode = UIDatePickerModeDate;
@@ -179,13 +177,13 @@
 
     // Set to something else first, to force an update.
     datePicker.date = [NSDate dateWithTimeIntervalSince1970:0];
-    datePicker.date = [self getRoundedDate:[[NSDate alloc] initWithTimeIntervalSince1970:(ticks / 1000)] minuteInterval:minuteInterval];
+    datePicker.date = [self getRoundedDate:[[NSDate alloc] initWithTimeIntervalSince1970:(ticks / DDBIntervalFactor)] minuteInterval:minuteInterval];
 }
 
 // Sends the date to the plugin javascript handler.
 - (void)callbackSuccessWithJavascript:(NSDate *)date
 {
-    long long ticks = ((long long)(int)[date timeIntervalSince1970]) * 1000;
+    long long ticks = ((long long)[date timeIntervalSince1970]) * DDBIntervalFactor;
     NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
     [result setObject:[NSNumber numberWithLongLong:ticks] forKey:@"ticks"];
 

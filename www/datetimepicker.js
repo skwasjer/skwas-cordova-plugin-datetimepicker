@@ -77,10 +77,8 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 			// The success handler expects the result to be:
 			//
 			// {
-			//   "result": {
-			//	   "ticks": a 64-bit int (ticks),
-			//	   "cancelled": true|false
-			//   }
+			//    "ticks": a 64-bit int (ticks),
+			//    "cancelled": true|false
 			// }
 			console.debug("DateTimePickerPlugin: Exec 'show' returned:", result);
 			if (utils.isDefined(result) && result !== null) {
@@ -109,10 +107,10 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 			settings.ticks = settings.date.valueOf();
 		}
 		if (!!settings.minDate && utils.validate(utils.isDate, settings, "minDate", "Expected a Date.")) {
-			settings.minDate = settings.minDate.valueOf();
+			settings.minDateTicks = settings.minDate.valueOf();
 		}
 		if (!!settings.maxDate && utils.validate(utils.isDate, settings, "maxDate", "Expected a Date.")) {
-			settings.maxDate = settings.maxDate.valueOf();
+			settings.maxDateTicks = settings.maxDate.valueOf();
 		}
 
 		if (!!settings.minuteInterval && utils.validate(utils.isMinuteInterval, settings, "minuteInterval", "Expected a Number which is a divisor of 60 (min 1, max 30).")) {
