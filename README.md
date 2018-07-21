@@ -35,8 +35,8 @@ This was the original way to call the plugin, and is kept for compatibility.
 |---------------------|---------------------|----------------|:--------------------------:|:--------------------------:|--------------------------|
 | mode                | String              | `date`         | `date`, `time`, `datetime` | `date`, `time`, `datetime` | The display mode |
 | date                | Date                |                | required                   | required                   | The initial date to display |
-| allowOldDates       | boolean             | true           | -                          | supported                  | Allow older dates to be selected |
-| allowFutureDates    | boolean             | true           | -                          | supported                  | Allow future dates to be selected |
+| allowOldDates       | boolean             | true           | supported                  | supported                  | Allow older dates to be selected |
+| allowFutureDates    | boolean             | true           | supported                  | supported                  | Allow future dates to be selected |
 | minDate             | Date                |                | supported                  | supported                  | Set the minimum date that can be selected |
 | maxDate             | Date                |                | supported                  | supported                  | Set the maximum date that can be selected |
 | minuteInterval      | int                 | 1              | >= Honeycomb               | supported                  | For minute spinner the number of minutes per step |
