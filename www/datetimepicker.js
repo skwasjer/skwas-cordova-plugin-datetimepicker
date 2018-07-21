@@ -132,7 +132,7 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 /**
  * Hide the date time picker.
  *
- * If the picker is currently being shown and a cancel-callback is provided
+ * If the picker is currently being shown and a cancel-callback was provided
  * in the options, the callback will be called when the picker is hidden.
  */
 DateTimePicker.prototype.hide = function() {

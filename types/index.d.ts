@@ -53,7 +53,7 @@ interface DateTimePicker {
   /**
    * Hide the date/time picker.
    *
-   * If the picker is currently being shown and a cancel-callback is provided
+   * If the picker is currently being shown and a cancel-callback was provided
    * in the options, the callback will be called when the picker is hidden.
    *
    * @memberof DateTimePicker

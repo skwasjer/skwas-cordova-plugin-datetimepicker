@@ -98,7 +98,18 @@ function onDeviceReady() {
 }
 ```
 
-> Note that not all options have to be set.
+### hide
+
+`hide()`  
+Hide the date time picker.
+
+If the picker is currently being shown and a cancel-callback was provided in the options, the callback will be called when the picker is hidden.
+
+#### Example
+
+```js
+cordova.plugins.DateTimePicker.hide();
+```
 
 ## Changelog
 
