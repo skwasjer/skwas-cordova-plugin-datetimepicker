@@ -99,20 +99,20 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		}.bind(this);
 
 	try {
-		utils.validate(utils.isValidMode, settings, "mode", " Expected a String: date, time, datetime.");
+		utils.validate(utils.isValidMode, settings, "mode", "Expected a String: date, time, datetime.");
 
 		// Validate if dates are valid, convert to ticks since epoch.
-		if (utils.validate(utils.isDate, settings, "date", " Expected a Date.")) {
+		if (utils.validate(utils.isDate, settings, "date", "Expected a Date.")) {
 			settings.ticks = settings.date.valueOf();
 		}
-		if (!!settings.minDate && utils.validate(utils.isDate, settings, "minDate", " Expected a Date.")) {
+		if (!!settings.minDate && utils.validate(utils.isDate, settings, "minDate", "Expected a Date.")) {
 			settings.minDate = settings.minDate.valueOf();
 		}
-		if (!!settings.maxDate && utils.validate(utils.isDate, settings, "maxDate", " Expected a Date.")) {
+		if (!!settings.maxDate && utils.validate(utils.isDate, settings, "maxDate", "Expected a Date.")) {
 			settings.maxDate = settings.maxDate.valueOf();
 		}
 
-		!!settings.minuteInterval && utils.validate(utils.isMinuteInterval, settings, "minuteInterval", " Expected a Number which is a divisor of 60 (min 1, max 30).");
+		!!settings.minuteInterval && utils.validate(utils.isMinuteInterval, settings, "minuteInterval", "Expected a Number which is a divisor of 60 (min 1, max 30).");
 	} catch (e) {
 		onPluginError(e.message);
 		return;

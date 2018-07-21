@@ -75,7 +75,11 @@ utils.getErrorHandler = function (callback) {
  */
 utils.validate = function (test, obj, key, message) {
 	if (!test(obj[key])) {
-		throw Error("The value '" + obj[key] + "' for option '" + key + "' is invalid." + (message || ""));
+		var msg = "The value '" + obj[key] + "' for option '" + key + "' is invalid.";
+		if (message) {
+			msg += " " + message;
+		}
+		throw Error(msg);
 	}
 	return true;
 }
