@@ -82,7 +82,7 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 			//	   "cancelled": true|false
 			//   }
 			// }
-
+			console.debug("DateTimePickerPlugin: Exec 'show' returned:", result);
 			if (utils.isDefined(result) && result !== null) {
 				if (utils.isObject(result)) {
 					if (result.cancelled === true) {
@@ -98,8 +98,11 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 			onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
 		}.bind(this);
 
+	// Validate/sanitize options.
 	try {
-		utils.validate(utils.isValidMode, settings, "mode", "Expected a String: date, time, datetime.");
+		if (utils.validate(utils.isValidMode, settings, "mode", "Expected a String: date, time, datetime.")) {
+			settings.mode = settings.mode.toLowerCase();
+		};
 
 		// Validate if dates are valid, convert to ticks since epoch.
 		if (utils.validate(utils.isDate, settings, "date", "Expected a Date.")) {
@@ -112,12 +115,19 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 			settings.maxDate = settings.maxDate.valueOf();
 		}
 
-		!!settings.minuteInterval && utils.validate(utils.isMinuteInterval, settings, "minuteInterval", "Expected a Number which is a divisor of 60 (min 1, max 30).");
+		if (!!settings.minuteInterval && utils.validate(utils.isMinuteInterval, settings, "minuteInterval", "Expected a Number which is a divisor of 60 (min 1, max 30).")) {
+			settings.minuteInterval = parseInt(settings.minuteInterval);
+		}
+
+		if (cordova.platformId !== "android") {
+			delete settings.android;
+		}
 	} catch (e) {
 		onPluginError(e.message);
 		return;
 	}
 
+	console.debug("DateTimePickerPlugin: Exec 'show' with:", settings);
 	exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [ settings ]);
 };
 
@@ -128,6 +138,7 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
  * in the options, the callback will be called when the picker is hidden.
  */
 DateTimePicker.prototype.hide = function() {
+	console.debug("DateTimePickerPlugin: Exec 'hide'.");
 	exec(null, utils.getErrorHandler().bind(this), "DateTimePicker", "hide");
 }
 

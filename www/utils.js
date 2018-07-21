@@ -58,9 +58,10 @@ function copy() {
 utils.getErrorHandler = function (callback) {
 	return function(err) {
 		if (callback && utils.isFunction(callback)) {
+			console.debug("DateTimePickerPlugin: " + err);
 			callback.apply(this, [ err ]);
 		} else {
-			console.error("DatePickerPlugin: " + err);
+			console.error("DateTimePickerPlugin: " + err);
 		}
 	};
 }
