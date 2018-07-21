@@ -80,7 +80,6 @@ function onDeviceReady() {
         cancelText: "Cancel",
         android: {
             theme: 16974126, // Theme_DeviceDefault_Dialog
-            calendar: false,
             is24HourView: true
         },
         success: function(newDate) {
