@@ -37,6 +37,7 @@ THE SOFTWARE.
     <js-module src="www/datetimepicker.js" name="DateTimePicker">
         <clobbers target="cordova.plugins.DateTimePicker" />
     </js-module>
+    <js-module src="www/utils.js" name="utils" />
 
     <!-- android -->
     <platform name="android">

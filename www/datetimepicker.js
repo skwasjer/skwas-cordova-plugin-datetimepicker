@@ -21,71 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-var utils = require('cordova/utils'),
+var utils = require('skwas-cordova-plugin-datetimepicker.utils'),
 	exec = require('cordova/exec');
-
-var modeRegex = /(date|time|datetime)/i,
-	isValidMode = modeRegex.test.bind(modeRegex);
-
-function noop() { };
-
-function isDate(val) {
-	return Object.prototype.toString.call(val) === "[object Date]" && !isNaN(val.getTime());
-}
-
-function is(value, type) {
-	return typeof value === type;
-}
-
-function isUndefined(value) {
-	return is(value, "undefined");
-}
-
-function isDefined(value) {
-	return !isUndefined(value);
-}
-
-function isFunction(value) {
-	return is(value, "function");
-}
-
-function isObject(value) {
-	return is(value, "object");
-}
-
-function isString(value) {
-	return is(value, "string");
-}
-
-function isNumber(value) {
-	return is(value, "number");
-}
-
-function isMinuteInterval(i) {
-	i = parseInt(i)
-	return isNumber(i) && !isNaN(i) && i >= 1 && i <= 30 && (60 % i === 0);
-}
-
-/**
- * Returns an error handler that logs to console if no callback is provided.
- * @param {Function} callback The external callback to call on error.
- */
-function getErrorHandler(callback) {
-	return function(err) {
-		if (callback && callback !== noop && isFunction(callback)) {
-			callback.apply(this, [ err ]);
-		} else {
-			console.error("DatePickerPlugin: " + err);
-		}
-	};
-}
-
-function validate(test, obj, key, message) {
-	if (!test(obj[key])) {
-		throw Error("The value '" + obj[key] + "' for option '" + key + "' is invalid." + (message || ""));
-	}
-	return true;
-}
 
 /**
  * This represents the DateTimePicker, and provides methods to show the native DateTime picker.
@@ -122,16 +59,20 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 
 	// Copy options into settings overwriting the defaults.
 	for (var key in settings) {
-		if (isDefined(options[key]))
+		if (utils.isDefined(options[key])) {
 			settings[key] = options[key];
+		}
 	}
 
-	// Set default callbacks if not set, or no function provided.
-	if (!isFunction(settings.success)) settings.success = successCallback || noop;
-	if (!isFunction(settings.cancel)) settings.cancel = noop;
-	if (!isFunction(settings.error)) settings.error = errorCallback || noop;
+	// Backward compat for callbacks.
+	if (!utils.isFunction(settings.success)) {
+		settings.success = successCallback;
+	}
+	if (!utils.isFunction(settings.error)) {
+		settings.error = errorCallback;
+	}
 
-	var onPluginError = getErrorHandler(settings.error).bind(this),
+	var onPluginError = utils.getErrorHandler(settings.error).bind(this),
 		onPluginSuccess = function(result) {
 			// The success handler expects the result to be:
 			//
@@ -142,15 +83,13 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 			//   }
 			// }
 
-			if (isDefined(result) && result !== null) {
-				if (isObject(result)) {
+			if (utils.isDefined(result) && result !== null) {
+				if (utils.isObject(result)) {
 					if (result.cancelled === true) {
-						settings.cancel.apply(this);
-					} else if (isNumber(result.ticks)) {
+						utils.isFunction(settings.cancel) && settings.cancel.apply(this);
+					} else if (utils.isNumber(result.ticks)) {
 						var resultDate = new Date(result.ticks);
-						if (isDate(resultDate)) {
-							settings.success.apply(this, [ resultDate ]);
-						}
+						utils.isDate(resultDate) && utils.isFunction(settings.success) && settings.success.apply(this, [ resultDate ]);
 					}
 					return;
 				}
@@ -160,20 +99,20 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		}.bind(this);
 
 	try {
-		validate(isValidMode, settings, "mode", " Expected a String: date, time, datetime.");
+		utils.validate(utils.isValidMode, settings, "mode", " Expected a String: date, time, datetime.");
 
 		// Validate if dates are valid, convert to ticks since epoch.
-		if (validate(isDate, settings, "date", " Expected a Date.")) {
+		if (utils.validate(utils.isDate, settings, "date", " Expected a Date.")) {
 			settings.ticks = settings.date.valueOf();
 		}
-		if (!!settings.minDate && validate(isDate, settings, "minDate", " Expected a Date.")) {
+		if (!!settings.minDate && utils.validate(utils.isDate, settings, "minDate", " Expected a Date.")) {
 			settings.minDate = settings.minDate.valueOf();
 		}
-		if (!!settings.maxDate && validate(isDate, settings, "maxDate", " Expected a Date.")) {
+		if (!!settings.maxDate && utils.validate(utils.isDate, settings, "maxDate", " Expected a Date.")) {
 			settings.maxDate = settings.maxDate.valueOf();
 		}
 
-		!!settings.minuteInterval && validate(isMinuteInterval, settings, "minuteInterval", " Expected a Number which is a divisor of 60 (min 1, max 30).");
+		!!settings.minuteInterval && utils.validate(utils.isMinuteInterval, settings, "minuteInterval", " Expected a Number which is a divisor of 60 (min 1, max 30).");
 	} catch (e) {
 		onPluginError(e.message);
 		return;
@@ -189,7 +128,7 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
  * in the options, the callback will be called when the picker is hidden.
  */
 DateTimePicker.prototype.hide = function() {
-	exec(null, getErrorHandler().bind(this), "DateTimePicker", "hide");
+	exec(null, utils.getErrorHandler().bind(this), "DateTimePicker", "hide");
 }
 
 module.exports = new DateTimePicker();
