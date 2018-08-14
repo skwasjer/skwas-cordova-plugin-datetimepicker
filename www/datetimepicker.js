@@ -87,7 +87,7 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 						utils.isFunction(settings.cancel) && settings.cancel.apply(this);
 					} else if (utils.isNumber(result.ticks)) {
 						var resultDate = new Date(result.ticks);
-						utils.isDate(resultDate) && utils.isFunction(settings.success) && settings.success.apply(this, [ resultDate ]);
+						utils.isFunction(settings.success) && settings.success.apply(this, [ resultDate ]);
 					}
 					return;
 				}
