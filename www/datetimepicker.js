@@ -81,16 +81,14 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 			//    "cancelled": true|false
 			// }
 			console.debug("DateTimePickerPlugin: Exec 'show' returned:", result);
-			if (utils.isDefined(result) && result !== null) {
-				if (utils.isObject(result)) {
-					if (result.cancelled === true) {
-						utils.isFunction(settings.cancel) && settings.cancel.apply(this);
-					} else if (utils.isNumber(result.ticks)) {
-						var resultDate = new Date(result.ticks);
-						utils.isFunction(settings.success) && settings.success.apply(this, [ resultDate ]);
-					}
-					return;
+			if (utils.isDefined(result) && utils.isObject(result) && result !== null) {
+				if (result.cancelled === true) {
+					utils.isFunction(settings.cancel) && settings.cancel.apply(this);
+				} else if (utils.isNumber(result.ticks)) {
+					var resultDate = new Date(result.ticks);
+					utils.isFunction(settings.success) && settings.success.apply(this, [ resultDate ]);
 				}
+				return;
 			}
 
 			onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
