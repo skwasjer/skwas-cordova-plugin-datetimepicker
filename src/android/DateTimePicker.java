@@ -114,16 +114,17 @@ public class DateTimePicker extends CordovaPlugin {
 	public synchronized boolean execute(String action, JSONArray args, final CallbackContext callbackContext) {
 		Log.d(TAG, "DateTimePicker called with options: " + args);
 
-		switch (action) {
-			case "show":
-				show(args, callbackContext);
-				return true;
-			case "hide":
-				hide(args, callbackContext);
-				return true;
-			default:
-				return false;
+		if (action.equals("show")) {
+			show(args, callbackContext);
+			return true;
 		}
+
+		if (action.equals("hide")) {
+			hide(args, callbackContext);
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
