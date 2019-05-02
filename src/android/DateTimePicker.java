@@ -21,12 +21,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 public class DateTimePicker extends CordovaPlugin {
-
 	/**
 	 * Options for date picker.
 	 * Note that not all options are supported, they are here to match the options across all platforms.
@@ -34,9 +37,9 @@ public class DateTimePicker extends CordovaPlugin {
 	private class DateTimePickerOptions {
 		@NonNull
 		public String mode = MODE_DATE;
-		public Date date = new Date();
-		public Date minDate;
-		public Date maxDate;
+		public ZonedDateTime date;
+		public ZonedDateTime minDate = _minSupportedDate;
+		public ZonedDateTime maxDate = _maxSupportedDate;
 		public boolean allowOldDates = true;
 		public boolean allowFutureDates = true;
 		public int minuteInterval = 1;
@@ -55,26 +58,21 @@ public class DateTimePicker extends CordovaPlugin {
 		public DateTimePickerOptions(JSONObject obj) throws JSONException {
 			this();
 
-			long nowTicks = date.getTime();
+			ZonedDateTime now = ZonedDateTime.now(_utcZone);
 
 			mode = obj.optString("mode", mode);
 
-			date = new Date(obj.getLong("ticks"));
+			date = ZonedDateTime.ofInstant(Instant.ofEpochMilli(obj.getLong("ticks")), _utcZone);
 
 			allowOldDates = obj.optBoolean("allowOldDates", allowOldDates);
 			allowFutureDates = obj.optBoolean("allowFutureDates", allowFutureDates);
 
-			if (obj.has("minDateTicks")) {
-				minDate = new Date(obj.getLong("minDateTicks"));
-			} else if (!allowOldDates) {
-				minDate = new Date(nowTicks);
-			}
-
-			if (obj.has("maxDateTicks")) {
-				maxDate = new Date(obj.getLong("maxDateTicks"));
-			} else if (!allowFutureDates) {
-				maxDate = new Date(nowTicks);
-			}
+			minDate = obj.has("minDateTicks")
+					? ZonedDateTime.ofInstant(Instant.ofEpochMilli(obj.getLong("minDateTicks")), _utcZone)
+					: (minDate = allowOldDates ? _minSupportedDate : now);
+			maxDate = obj.has("maxDateTicks")
+					? ZonedDateTime.ofInstant(Instant.ofEpochMilli(obj.getLong("maxDateTicks")), _utcZone)
+					: (maxDate = allowFutureDates ? _maxSupportedDate : now);
 
 			minuteInterval = obj.optInt("minuteInterval", minuteInterval);
 
@@ -102,6 +100,10 @@ public class DateTimePicker extends CordovaPlugin {
 	private static final String MODE_DATETIME = "datetime";
 	private static final String TAG = "DateTimePicker";
 
+	private static final ZoneId _utcZone = ZoneId.of("UTC");
+	private ZonedDateTime _minSupportedDate;
+	private ZonedDateTime _maxSupportedDate;
+
 	private Activity _activity;
 	private volatile Runnable _runnable;
 	private volatile Dialog _dialog;
@@ -111,6 +113,11 @@ public class DateTimePicker extends CordovaPlugin {
 		super.initialize(cordova, webView);
 
 		_activity = cordova.getActivity();
+
+		DatePicker dp = new DatePicker(_activity);
+		// Min/max dates can be different depending on Android version.
+		_minSupportedDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(dp.getMinDate()), _utcZone);
+		_maxSupportedDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(dp.getMaxDate()), _utcZone);
 	}
 
 	@Override
@@ -166,7 +173,8 @@ public class DateTimePicker extends CordovaPlugin {
 
 		// Set calendar.
 		final Calendar calendar = GregorianCalendar.getInstance();
-		calendar.setTime(options.date);
+		calendar.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+		calendar.setTimeInMillis(options.date.toInstant().toEpochMilli());
 
 		if (MODE_TIME.equalsIgnoreCase(options.mode)) {
 			_runnable = showTimeDialog(datePickerPlugin, callbackContext, options, calendar);
@@ -240,12 +248,9 @@ public class DateTimePicker extends CordovaPlugin {
 				dateDialog.setCalendarEnabled(options.calendar);
 
 				DatePicker dp = dateDialog.getDatePicker();
-				if (options.minDate != null) {
-					dp.setMinDate(options.minDate.getTime());
-				}
-				if (options.maxDate != null) {
-					dp.setMaxDate(options.maxDate.getTime());
-				}
+
+				dp.setMinDate(options.minDate.toInstant().toEpochMilli());
+				dp.setMaxDate(options.maxDate.toInstant().toEpochMilli());
 
 				showDialog(dateDialog, callbackContext);
 			}
