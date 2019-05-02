@@ -21,8 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-var argscheck = require('cordova/argscheck'),
-	utils = require('cordova/utils'),
+var utils = require('skwas-cordova-plugin-datetimepicker.utils'),
 	exec = require('cordova/exec');
 
 /**
@@ -38,8 +37,6 @@ function DateTimePicker() {
  * @param {Function} successCallback The function to call when the datetime has changed.
  */
 DateTimePicker.prototype.show = function(options, successCallback, errorCallback) {
-	function noop() {};
-
 	var settings = {
 		mode: "date",
 		date: new Date(),
@@ -60,83 +57,85 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		error: undefined
 	};
 
-	function onPluginError(err) {
-		if (settings.error !== noop)
-			settings.error(err);
-		else
-			console.error("DatePickerPlugin: " + err);
-	};
+	// Copy options into settings overwriting the defaults.
+	for (var key in settings) {
+		if (utils.isDefined(options[key])) {
+			settings[key] = options[key];
+		}
+	}
 
-	function onPluginSuccess(result) {
-		// The plugin expects the result to be:
-		//
-		// {
-		//	 "result": {
-		//	   "ticks": a 64-bit int (ticks),
-		//	   "cancelled": true|false
-		//	 }
-		// }
+	// Backward compat for callbacks.
+	if (!utils.isFunction(settings.success)) {
+		settings.success = successCallback;
+	}
+	if (!utils.isFunction(settings.error)) {
+		settings.error = errorCallback;
+	}
 
-		if (typeof result !== "undefined" && result !== null) {
-			if (typeof result === "object") {
+	var onPluginError = utils.getErrorHandler(settings.error).bind(this),
+		onPluginSuccess = function(result) {
+			// The success handler expects the result to be:
+			//
+			// {
+			//    "ticks": a 64-bit int (ticks),
+			//    "cancelled": true|false
+			// }
+			console.debug("DateTimePickerPlugin: Exec 'show' returned:", result);
+			if (utils.isDefined(result) && utils.isObject(result) && result !== null) {
 				if (result.cancelled === true) {
-					settings.cancel();
-				} else if (typeof result.ticks === "number") {
+					utils.isFunction(settings.cancel) && settings.cancel.apply(this);
+				} else if (utils.isNumber(result.ticks)) {
 					var resultDate = new Date(result.ticks);
-					if (isDate(resultDate)) {
-						settings.success(resultDate);
-					}
+					utils.isFunction(settings.success) && settings.success.apply(this, [ resultDate ]);
 				}
 				return;
 			}
+
+			onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
+		}.bind(this);
+
+	// Validate/sanitize options.
+	try {
+		if (utils.validate(utils.isValidMode, settings, "mode", "Expected a String: date, time, datetime.")) {
+			settings.mode = settings.mode.toLowerCase();
+		};
+
+		// Validate if dates are valid, convert to ticks since epoch.
+		if (utils.validate(utils.isDate, settings, "date", "Expected a Date.")) {
+			settings.ticks = settings.date.valueOf();
 		}
-		onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
-	};
-
-	function isDate(val) {
-		return Object.prototype.toString.call(val) === "[object Date]" && !isNaN(val.getTime());
-	}
-
-	function checkDate(obj, key, onError) {
-		if (!isDate(obj[key])) {
-			onError("The value " + obj[key] + " for " + key + " is invalid.");
-			return false;
+		if (!!settings.minDate && utils.validate(utils.isDate, settings, "minDate", "Expected a Date.")) {
+			settings.minDateTicks = settings.minDate.valueOf();
 		}
-		return true;
-	}
+		if (!!settings.maxDate && utils.validate(utils.isDate, settings, "maxDate", "Expected a Date.")) {
+			settings.maxDateTicks = settings.maxDate.valueOf();
+		}
 
-	// Copy options into settings overwriting the defaults.
-	for (var key in settings) {
-		if (typeof options[key] !== "undefined")
-			settings[key] = options[key];
-	}
+		if (!!settings.minuteInterval && utils.validate(utils.isMinuteInterval, settings, "minuteInterval", "Expected a Number which is a divisor of 60 (min 1, max 30).")) {
+			settings.minuteInterval = parseInt(settings.minuteInterval);
+		}
 
-	// Set default callbacks if not set, or no function provided.
-	if (typeof settings.success !== "function") settings.success = successCallback || noop;
-	if (typeof settings.cancel !== "function") settings.cancel = noop;
-	if (typeof settings.error !== "function") settings.error = errorCallback || noop;
-
-	// Check if dates are valid and convert to ticks since epoch.
-	if (!checkDate(settings, "date", onPluginError)) {
+		if (cordova.platformId !== "android") {
+			delete settings.android;
+		}
+	} catch (e) {
+		onPluginError(e.message);
 		return;
 	}
-	settings.ticks = settings.date.valueOf();
 
-	if (!!settings.minDate) {
-		if (!checkDate(settings, "minDate", onPluginError)) {
-			return;
-		}
-		settings.minDate = settings.minDate.valueOf();
-	}
-
-	if (!!settings.maxDate) {
-		if (!checkDate(settings, "maxDate", onPluginError)) {
-			return;
-		}
-		settings.maxDate = settings.maxDate.valueOf();
-	}
-
-	exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [settings]);
+	console.debug("DateTimePickerPlugin: Exec 'show' with:", settings);
+	exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [ settings ]);
 };
+
+/**
+ * Hide the date time picker.
+ *
+ * If the picker is currently being shown and a cancel-callback was provided
+ * in the options, the callback will be called when the picker is hidden.
+ */
+DateTimePicker.prototype.hide = function() {
+	console.debug("DateTimePickerPlugin: Exec 'hide'.");
+	exec(null, utils.getErrorHandler().bind(this), "DateTimePicker", "hide");
+}
 
 module.exports = new DateTimePicker();

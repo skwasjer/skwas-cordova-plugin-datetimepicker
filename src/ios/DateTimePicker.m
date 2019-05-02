@@ -30,18 +30,35 @@
 
 - (void)show:(CDVInvokedUrlCommand*)command
 {
-    if (isVisible) return;
-    
+    if (isVisible) {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ILLEGAL_ACCESS_EXCEPTION messageAsString:@"A date/time picker dialog is already showing."];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
     self.callbackId = command.callbackId;
-    
+
     NSMutableDictionary *optionsOrNil = [command.arguments objectAtIndex:command.arguments.count - 1];
-        
+
     [self configureDatePicker:optionsOrNil datePicker:self.modalPicker.datePicker];
-            
+
     // Present the view with our custom transition.
     [self.viewController presentViewController:self.modalPicker animated:YES completion:nil];
-    
+
     isVisible = YES;
+}
+
+- (void)hide:(CDVInvokedUrlCommand*)command
+{
+    if (isVisible) {
+        // Hide the view with our custom transition.
+        [self.modalPicker dismissViewControllerAnimated:true completion:nil];
+        [self callbackCancelWithJavascript];
+        isVisible = NO;
+    }
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)onMemoryWarning
@@ -50,7 +67,7 @@
     if (isVisible) {
         return;
     }
-    
+
     [super onMemoryWarning];
 }
 
@@ -80,24 +97,24 @@
                                          initWithHeaderText:@""
                                          dismissText:@""
                                          cancelText:@""];
-    
+
     picker.modalPresentationStyle = UIModalPresentationCustom;
     picker.transitioningDelegate = self;
 
     __weak ModalPickerViewController* weakPicker = picker;
-    
+
     picker.headerBackgroundColor = [UIColor colorWithRed:0.92f green:0.92f blue:0.92f alpha:0.95f];
-    
+
     picker.dismissedHandler = ^(id sender) {
         [self callbackSuccessWithJavascript:weakPicker.datePicker.date];
         isVisible = NO;
     };
-    
+
     picker.cancelHandler = ^(id sender) {
         [self callbackCancelWithJavascript];
         isVisible = NO;
     };
-    
+
     self.modalPicker = picker;
 }
 
@@ -123,15 +140,16 @@
 {
     NSString *mode = [optionsOrNil objectForKey:@"mode"];
     long long ticks = [[optionsOrNil objectForKey:@"ticks"] longLongValue];
-    NSNumber *minDate = [optionsOrNil objectForKey:@"minDate"];
-    NSNumber *maxDate = [optionsOrNil objectForKey:@"maxDate"];
     NSString *localeString = [optionsOrNil objectForKey:@"locale"];
     NSString *okTextString = [optionsOrNil objectForKey:@"okText"];
     NSString *cancelTextString = [optionsOrNil objectForKey:@"cancelText"];
     BOOL allowOldDates = [[optionsOrNil objectForKey:@"allowOldDates"] intValue] == 1 ? YES : NO;
     BOOL allowFutureDates = [[optionsOrNil objectForKey:@"allowFutureDates"] intValue] == 1 ? YES : NO;
+    long long nowTicks = ((long long)[[NSDate date] timeIntervalSince1970]) * DDBIntervalFactor;
+    long long minDateTicks = [[optionsOrNil objectForKey:@"minDateTicks"] ?: [NSNumber numberWithLong:(allowOldDates ? DDBMinDate : nowTicks)] longLongValue];
+    long long maxDateTicks = [[optionsOrNil objectForKey:@"maxDateTicks"] ?: [NSNumber numberWithLong:(allowFutureDates ? DDBMaxDate : nowTicks)] longLongValue];
     NSInteger minuteInterval = [[optionsOrNil objectForKey:@"minuteInterval"] intValue];
-    
+
     if (localeString == nil || localeString.length == 0) localeString = @"EN";
     datePicker.locale = [[NSLocale alloc] initWithLocaleIdentifier:localeString];
 
@@ -141,37 +159,34 @@
     self.modalPicker.dismissText = okTextString;
     self.modalPicker.cancelText = cancelTextString;
 
-    if (!allowOldDates) datePicker.minimumDate = [NSDate date];
-    if (!allowFutureDates) datePicker.maximumDate = [NSDate date];
-    
-    if (minDate != nil && minDate != (id)[NSNull null]) {
-        datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:([minDate longLongValue] / 1000)];
+    if (minDateTicks > maxDateTicks)
+    {
+        minDateTicks = DDBMinDate;
     }
-    if (maxDate != nil && maxDate != (id)[NSNull null] && (!(minDate != nil && minDate != (id)[NSNull null]) || maxDate > minDate)) {
-        datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:([maxDate longLongValue] / 1000)];
-    }
-    
+    datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:(minDateTicks / DDBIntervalFactor)];
+    datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:(maxDateTicks / DDBIntervalFactor)];
+
     if ([mode isEqualToString:@"date"])
         datePicker.datePickerMode = UIDatePickerModeDate;
     else if ([mode isEqualToString:@"time"])
         datePicker.datePickerMode = UIDatePickerModeTime;
     else
         datePicker.datePickerMode = UIDatePickerModeDateAndTime;
-    
+
     datePicker.minuteInterval = minuteInterval;
-    
+
     // Set to something else first, to force an update.
     datePicker.date = [NSDate dateWithTimeIntervalSince1970:0];
-    datePicker.date = [self getRoundedDate:[[NSDate alloc] initWithTimeIntervalSince1970:(ticks / 1000)] minuteInterval:minuteInterval];
+    datePicker.date = [self getRoundedDate:[[NSDate alloc] initWithTimeIntervalSince1970:(ticks / DDBIntervalFactor)] minuteInterval:minuteInterval];
 }
 
 // Sends the date to the plugin javascript handler.
 - (void)callbackSuccessWithJavascript:(NSDate *)date
 {
-    long long ticks = ((long long)(int)[date timeIntervalSince1970]) * 1000;
+    long long ticks = ((long long)[date timeIntervalSince1970]) * DDBIntervalFactor;
     NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
     [result setObject:[NSNumber numberWithLongLong:ticks] forKey:@"ticks"];
-    
+
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
@@ -181,7 +196,7 @@
 {
     NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
     [result setObject:[NSNumber numberWithBool:YES] forKey:@"cancelled"];
-    
+
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }

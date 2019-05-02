@@ -3,6 +3,7 @@ package com.skwas.cordova.datetimepicker;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.app.Dialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
@@ -15,27 +16,30 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 public class DateTimePicker extends CordovaPlugin {
-
 	/**
 	 * Options for date picker.
-	 *
 	 * Note that not all options are supported, they are here to match the options across all platforms.
 	 */
 	private class DateTimePickerOptions {
 		@NonNull
 		public String mode = MODE_DATE;
-		public Date date = new Date();
-		public long minDate = 0;
-		public long maxDate = 0;
+		public ZonedDateTime date;
+		public ZonedDateTime minDate = _minSupportedDate;
+		public ZonedDateTime maxDate = _maxSupportedDate;
 		public boolean allowOldDates = true;
 		public boolean allowFutureDates = true;
 		public int minuteInterval = 1;
@@ -54,15 +58,23 @@ public class DateTimePicker extends CordovaPlugin {
 		public DateTimePickerOptions(JSONObject obj) throws JSONException {
 			this();
 
+			ZonedDateTime now = ZonedDateTime.now(_utcZone);
+
 			mode = obj.optString("mode", mode);
 
-			date = new Date(obj.getLong("ticks"));
-			minDate = obj.optLong("minDate", minDate);
-			maxDate = obj.optLong("maxDate", maxDate);
-			minuteInterval = obj.optInt("minuteInterval", minuteInterval);
+			date = ZonedDateTime.ofInstant(Instant.ofEpochMilli(obj.getLong("ticks")), _utcZone);
 
 			allowOldDates = obj.optBoolean("allowOldDates", allowOldDates);
 			allowFutureDates = obj.optBoolean("allowFutureDates", allowFutureDates);
+
+			minDate = obj.has("minDateTicks")
+					? ZonedDateTime.ofInstant(Instant.ofEpochMilli(obj.getLong("minDateTicks")), _utcZone)
+					: (minDate = allowOldDates ? _minSupportedDate : now);
+			maxDate = obj.has("maxDateTicks")
+					? ZonedDateTime.ofInstant(Instant.ofEpochMilli(obj.getLong("maxDateTicks")), _utcZone)
+					: (maxDate = allowFutureDates ? _maxSupportedDate : now);
+
+			minuteInterval = obj.optInt("minuteInterval", minuteInterval);
 
 			if (!obj.isNull("okText")) {
 				okText = obj.optString("okText");
@@ -88,35 +100,61 @@ public class DateTimePicker extends CordovaPlugin {
 	private static final String MODE_DATETIME = "datetime";
 	private static final String TAG = "DateTimePicker";
 
+	private static final ZoneId _utcZone = ZoneId.of("UTC");
+	private ZonedDateTime _minSupportedDate;
+	private ZonedDateTime _maxSupportedDate;
+
 	private Activity _activity;
+	private volatile Runnable _runnable;
+	private volatile Dialog _dialog;
 
 	@Override
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 		super.initialize(cordova, webView);
 
 		_activity = cordova.getActivity();
+
+		DatePicker dp = new DatePicker(_activity);
+		// Min/max dates can be different depending on Android version.
+		_minSupportedDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(dp.getMinDate()), _utcZone);
+		_maxSupportedDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(dp.getMaxDate()), _utcZone);
 	}
 
 	@Override
-	public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+	public synchronized boolean execute(String action, JSONArray args, final CallbackContext callbackContext) {
 		Log.d(TAG, "DateTimePicker called with options: " + args);
 
 		if (action.equals("show")) {
 			show(args, callbackContext);
 			return true;
 		}
+
+		if (action.equals("hide")) {
+			hide(args, callbackContext);
+			return true;
+		}
+
 		return false;
 	}
 
 	/**
 	 * Plugin 'show' method.
 	 *
-	 * @param data The JSON arguments passed to the method.
+	 * @param data            The JSON arguments passed to the method.
 	 * @param callbackContext The callback context.
 	 * @return true when the dialog is shown
 	 */
 	public synchronized boolean show(final JSONArray data, final CallbackContext callbackContext) {
-		final Runnable runnable;
+		if (_runnable != null) {
+			callbackContext.sendPluginResult(
+					new PluginResult(
+							PluginResult.Status.ILLEGAL_ACCESS_EXCEPTION,
+							"A date/time picker dialog is already showing."
+					)
+			);
+			return false;
+		}
+
 		final DateTimePicker datePickerPlugin = this;
 		final DateTimePickerOptions options;
 
@@ -135,18 +173,36 @@ public class DateTimePicker extends CordovaPlugin {
 
 		// Set calendar.
 		final Calendar calendar = GregorianCalendar.getInstance();
-		calendar.setTime(options.date);
+		calendar.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+		calendar.setTimeInMillis(options.date.toInstant().toEpochMilli());
 
 		if (MODE_TIME.equalsIgnoreCase(options.mode)) {
-			runnable = showTimeDialog(datePickerPlugin, callbackContext, options, calendar);
+			_runnable = showTimeDialog(datePickerPlugin, callbackContext, options, calendar);
 		} else if (MODE_DATE.equalsIgnoreCase(options.mode) || MODE_DATETIME.equalsIgnoreCase(options.mode)) {
-			runnable = showDateDialog(datePickerPlugin, callbackContext, options, calendar);
+			_runnable = showDateDialog(datePickerPlugin, callbackContext, options, calendar);
 		} else {
 			callbackContext.error("Unknown mode. Only 'date', 'time' and 'datetime' are valid modes.");
 			return false;
 		}
 
-		_activity.runOnUiThread(runnable);
+		_activity.runOnUiThread(_runnable);
+		return true;
+	}
+
+	/**
+	 * Plugin 'hide' method.
+	 *
+	 * @param data            The JSON arguments passed to the method.
+	 * @param callbackContext The callback context.
+	 * @return always returns true.
+	 */
+	public synchronized boolean hide(final JSONArray data, final CallbackContext callbackContext) {
+		if (_runnable != null && _dialog != null) {
+			_dialog.cancel();
+			_dialog = null;
+		}
+
+		callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.NO_RESULT));
 		return true;
 	}
 
@@ -192,12 +248,9 @@ public class DateTimePicker extends CordovaPlugin {
 				dateDialog.setCalendarEnabled(options.calendar);
 
 				DatePicker dp = dateDialog.getDatePicker();
-				if (options.minDate > 0) {
-					dp.setMinDate(options.minDate);
-				}
-				if (options.maxDate > 0 && options.maxDate > options.minDate) {
-					dp.setMaxDate(options.maxDate);
-				}
+
+				dp.setMinDate(options.minDate.toInstant().toEpochMilli());
+				dp.setMaxDate(options.maxDate.toInstant().toEpochMilli());
 
 				showDialog(dateDialog, callbackContext);
 			}
@@ -207,10 +260,10 @@ public class DateTimePicker extends CordovaPlugin {
 	/**
 	 * Show the picker dialog.
 	 *
-	 * @param dialog The dialog to show.
+	 * @param dialog          The dialog to show.
 	 * @param callbackContext The callback context.
 	 */
-	private static void showDialog(final AlertDialog dialog, final CallbackContext callbackContext) {
+	private synchronized void showDialog(final AlertDialog dialog, final CallbackContext callbackContext) {
 		dialog.setCancelable(true);
 		dialog.setCanceledOnTouchOutside(false);
 
@@ -223,20 +276,23 @@ public class DateTimePicker extends CordovaPlugin {
 					callbackContext.success(result);
 				} catch (JSONException ex) {
 					callbackContext.error("Failed to cancel.");
+				} finally {
+					_runnable = null;
 				}
 			}
 		});
 
+		_dialog = dialog;
 		dialog.show();
 	}
 
 	/**
 	 * Success callback for when a new date or time is set.
 	 *
-	 * @param calendar The calendar with the new date and/or time.
+	 * @param calendar        The calendar with the new date and/or time.
 	 * @param callbackContext The callback context.
 	 */
-	private static void onCalendarSet(Calendar calendar, CallbackContext callbackContext) {
+	private synchronized void onCalendarSet(Calendar calendar, CallbackContext callbackContext) {
 		try {
 			JSONObject result = new JSONObject();
 			Date date = calendar.getTime();
@@ -247,6 +303,8 @@ public class DateTimePicker extends CordovaPlugin {
 			callbackContext.success(result);
 		} catch (JSONException ex) {
 			callbackContext.error("Failed to serialize date. " + calendar.getTime().toString());
+		} finally {
+			_runnable = null;
 		}
 	}
 
@@ -273,9 +331,11 @@ public class DateTimePicker extends CordovaPlugin {
 			mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
 			if (MODE_DATETIME.equalsIgnoreCase(mOptions.mode)) {
-				_activity.runOnUiThread(
-						showTimeDialog(mDatePickerPlugin, mCallbackContext, mOptions, mCalendar)
-				);
+				synchronized (mDatePickerPlugin) {
+					_activity.runOnUiThread(
+							_runnable = showTimeDialog(mDatePickerPlugin, mCallbackContext, mOptions, mCalendar)
+					);
+				}
 			} else {
 				onCalendarSet(mCalendar, mCallbackContext);
 			}

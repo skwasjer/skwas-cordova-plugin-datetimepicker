@@ -46,11 +46,11 @@ const float _buttonMargin = 10;
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    
+
     _internalView.backgroundColor = _headerBackgroundColor;
     _headerLabel.textColor = _headerTextColor;
     _headerLabel.text = _headerText;
-    
+
     [_doneButton setTitle:_dismissText forState:UIControlStateNormal];
     [_cancelButton setTitle:_cancelText forState:UIControlStateNormal];
 }
@@ -66,7 +66,7 @@ const float _buttonMargin = 10;
 - (void)createControls {
     self.view.backgroundColor = [UIColor clearColor];
     self.view.opaque = NO;
-    
+
     // Measurements of our internal view.
     CGRect viewFrame = self.view.frame;
     CGSize internalViewSize = CGSizeMake(viewFrame.size.width, _datePickerHeight + _headerBarHeight);
@@ -88,7 +88,7 @@ const float _buttonMargin = 10;
     _doneButton.backgroundColor = [UIColor clearColor];
     _doneButton.titleLabel.font = [UIFont boldSystemFontOfSize:[UIFont systemFontSize] * 1.1];
     [_doneButton addTarget:self action:@selector(doneButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    
+
     // Create cancel button.
     _cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
     _cancelButton.frame = CGRectMake(_buttonMargin, _buttonMargin / 2, _cancelButtonSize.width, _cancelButtonSize.height);
@@ -96,7 +96,7 @@ const float _buttonMargin = 10;
     _cancelButton.backgroundColor = [UIColor clearColor];
     _cancelButton.titleLabel.font = [UIFont systemFontOfSize:[UIFont systemFontSize] * 1.1];
     [_cancelButton addTarget:self action:@selector(cancelButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    
+
     // Create the date picker.
     _datePicker = [[UIDatePicker alloc] initWithFrame:CGRectZero];
     _datePicker.frame = CGRectMake(0, _headerBarHeight, internalViewSize.width, _datePickerHeight);
@@ -112,7 +112,7 @@ const float _buttonMargin = 10;
     [_internalView addSubview:_headerLabel];
     [_internalView addSubview:_doneButton];
     [_internalView addSubview:_cancelButton];
-    
+
     [self.view addSubview:_internalView];
 }
 

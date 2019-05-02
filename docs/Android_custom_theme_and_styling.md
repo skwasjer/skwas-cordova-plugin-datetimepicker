@@ -41,6 +41,7 @@ So let's do it the proper way!
   ```
 
 In this example theme:
+
 - we defined a theme named `MyAppTheme` which we will apply to the Android activity later on.
 - we defined two custom styles for the date and time picker widget, with an attribute `datePickerMode` and `timePickerMode` both set to `spinner`. This should change the pickers from radials into spinners.
 
@@ -48,10 +49,13 @@ In this example theme:
 
 - Open the `config.xml` in the Cordova project root.
 - Add the Android schema with a namespace declaration to the `widget` element if it isn't already there:
+
   ```xml
   <widget ... xmlns:android="http://schemas.android.com/apk/res/android">
   ```
+
 - Add the following XML to the `widget` element:
+
   ```xml
   <widget ...>
     ...
@@ -67,7 +71,7 @@ In this example theme:
 
 Let's break down what is happening:
 
-#### Platform specific configuration
+### Platform specific configuration
 
 The `platform` element allows us configure the Android platform specifically, as this does not apply to `iOS` or others.
 
@@ -76,7 +80,7 @@ The `platform` element allows us configure the Android platform specifically, as
 </platform>
 ```
 
-#### Copy the styles file
+### Copy the styles file
 
 With the `resource-file` element we can copy a file to a target folder during build.
 
@@ -85,10 +89,10 @@ With the `resource-file` element we can copy a file to a target folder during bu
 ```
 
 > The base location of `src` is the project root, whereas the `target` location points to the location under the platform folder (`platforms/android`).
-
+>
 > NOTE: The `target` location may differ for other Cordova versions.
 
-#### Transform AndroidManifest.xml
+### Transform AndroidManifest.xml
 
 To enable our custom theme, we replace the default theme with our own on the `activity` element:
 
@@ -116,6 +120,7 @@ cordova.plugins.DateTimePicker.show({
   }
 })
 ```
+
 ## Build and run
 
 - `cordova build android`
@@ -152,4 +157,4 @@ And the result:
 
 With some extra configuration it is fairly easy to get spinners back in a reliable way and with proper theming.
 
-While in this example I solely focus on changing the picker mode style, there are more styling options available, but I will leave that as an exercise to the reader. 
+While in this example I solely focus on changing the picker mode style, there are more styling options available, but I will leave that as an exercise to the reader.
