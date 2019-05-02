@@ -14,8 +14,9 @@ or for latest
 
 ## Supported platforms
 
-- Android 4 and higher
-- iOS 8 and higher (tested with Xcode 7.2.3, Xcode 8 and Xcode 9.2)
+- Android 8 and higher
+- iOS 10 and higher
+- Cordova 7
 
 ## Methods
 
@@ -54,7 +55,6 @@ This was the original way to call the plugin, and is kept for compatibility.
 | Name                | Type                | Default     | Description               |
 |---------------------|---------------------|-------------|---------------------------|
 | theme               | int                 | [Theme_DeviceDefault_Dialog](https://developer.android.com/reference/android/R.style.html#Theme_DeviceDefault_Dialog)| android.R.style theme |
-| calendar ([obsolete](./docs/Android_custom_theme_and_styling.md)) | boolean             | false       | `false` shows spinners, however this depend on the theme selected and SDK version. When `true`, forces a calendar view.|
 | is24HourView        | boolean             | true        | Use a 24 hour clock |
 
 > On Lollipop and upwards the date and time pickers changed to calendar and radial pickers. If you want to use spinners (for example to use `minuteInterval`), use a built-in [android.R.style](https://developer.android.com/reference/android/R.style.html) theme that shows a date and time picker with spinners or read up here [how to customize this](./docs/Android_custom_theme_and_styling.md).

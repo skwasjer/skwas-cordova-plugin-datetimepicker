@@ -18,6 +18,10 @@ Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
 - Validate and sanitize options
 
+### Breaking
+
+- Android: requires API level 26 (https://developer.android.com/distribute/best-practices/develop/target-sdk)
+
 ## 1.1.3
 
 - Android: Due to a [known bug](https://issuetracker.google.com/issues/36951008), when cancelling on Jelly Bean and KitKat, the cancel callback was not called. Instead the success callback was called. Fixes #18.
