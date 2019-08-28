@@ -25,7 +25,7 @@ List Cordova versions by running:
 - `cordova platform ls`
 
 **Development OS (please complete the following information):**
- - OS: [e.g. iOS, Windows]
+ - OS: [e.g. Windows, Mac]
 
 **Device (please complete the following information):**
  - Device: [e.g. iPhone6, Samsung S4, Emulator]
