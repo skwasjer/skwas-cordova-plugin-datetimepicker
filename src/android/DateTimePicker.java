@@ -21,13 +21,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
 public class DateTimePicker extends CordovaPlugin {
 	/**
@@ -37,9 +33,9 @@ public class DateTimePicker extends CordovaPlugin {
 	private class DateTimePickerOptions {
 		@NonNull
 		public String mode = MODE_DATE;
-		public ZonedDateTime date;
-		public ZonedDateTime minDate = _minSupportedDate;
-		public ZonedDateTime maxDate = _maxSupportedDate;
+		public Date date;
+		public Date minDate = _minSupportedDate;
+		public Date maxDate = _maxSupportedDate;
 		public boolean allowOldDates = true;
 		public boolean allowFutureDates = true;
 		public int minuteInterval = 1;
@@ -58,20 +54,20 @@ public class DateTimePicker extends CordovaPlugin {
 		public DateTimePickerOptions(JSONObject obj) throws JSONException {
 			this();
 
-			ZonedDateTime now = ZonedDateTime.now(_utcZone);
+			Date now = new Date();
 
 			mode = obj.optString("mode", mode);
 
-			date = ZonedDateTime.ofInstant(Instant.ofEpochMilli(obj.getLong("ticks")), _utcZone);
+			date = new Date(obj.getLong("ticks"));
 
 			allowOldDates = obj.optBoolean("allowOldDates", allowOldDates);
 			allowFutureDates = obj.optBoolean("allowFutureDates", allowFutureDates);
 
 			minDate = obj.has("minDateTicks")
-					? ZonedDateTime.ofInstant(Instant.ofEpochMilli(obj.getLong("minDateTicks")), _utcZone)
+					? new Date(obj.getLong("minDateTicks"))
 					: (minDate = allowOldDates ? _minSupportedDate : now);
 			maxDate = obj.has("maxDateTicks")
-					? ZonedDateTime.ofInstant(Instant.ofEpochMilli(obj.getLong("maxDateTicks")), _utcZone)
+					? new Date(obj.getLong("maxDateTicks"))
 					: (maxDate = allowFutureDates ? _maxSupportedDate : now);
 
 			minuteInterval = obj.optInt("minuteInterval", minuteInterval);
@@ -100,9 +96,8 @@ public class DateTimePicker extends CordovaPlugin {
 	private static final String MODE_DATETIME = "datetime";
 	private static final String TAG = "DateTimePicker";
 
-	private static final ZoneId _utcZone = ZoneId.of("UTC");
-	private ZonedDateTime _minSupportedDate;
-	private ZonedDateTime _maxSupportedDate;
+	private Date _minSupportedDate;
+	private Date _maxSupportedDate;
 
 	private Activity _activity;
 	private volatile Runnable _runnable;
@@ -116,8 +111,8 @@ public class DateTimePicker extends CordovaPlugin {
 
 		DatePicker dp = new DatePicker(_activity);
 		// Min/max dates can be different depending on Android version.
-		_minSupportedDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(dp.getMinDate()), _utcZone);
-		_maxSupportedDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(dp.getMaxDate()), _utcZone);
+		_minSupportedDate = new Date(dp.getMinDate());
+		_maxSupportedDate = new Date(dp.getMaxDate());
 	}
 
 	@Override
@@ -173,8 +168,7 @@ public class DateTimePicker extends CordovaPlugin {
 
 		// Set calendar.
 		final Calendar calendar = GregorianCalendar.getInstance();
-		calendar.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
-		calendar.setTimeInMillis(options.date.toInstant().toEpochMilli());
+		calendar.setTimeInMillis(options.date.getTime());
 
 		if (MODE_TIME.equalsIgnoreCase(options.mode)) {
 			_runnable = showTimeDialog(datePickerPlugin, callbackContext, options, calendar);
@@ -249,8 +243,8 @@ public class DateTimePicker extends CordovaPlugin {
 
 				DatePicker dp = dateDialog.getDatePicker();
 
-				dp.setMinDate(options.minDate.toInstant().toEpochMilli());
-				dp.setMaxDate(options.maxDate.toInstant().toEpochMilli());
+				dp.setMinDate(options.minDate.getTime());
+				dp.setMaxDate(options.maxDate.getTime());
 
 				showDialog(dateDialog, callbackContext);
 			}
@@ -293,16 +287,17 @@ public class DateTimePicker extends CordovaPlugin {
 	 * @param callbackContext The callback context.
 	 */
 	private synchronized void onCalendarSet(Calendar calendar, CallbackContext callbackContext) {
+		Date selectedDate = calendar.getTime();
+
 		try {
 			JSONObject result = new JSONObject();
-			Date date = calendar.getTime();
 			// Due to lack of browser/user agent support for ISO 8601 parsing, we provide ticks since epoch.
 			// The Javascript date constructor works far more reliably this way, even on old JS engines.
-			result.put("ticks", date.getTime());
+			result.put("ticks", selectedDate.getTime());
 			result.put("cancelled", false);
 			callbackContext.success(result);
 		} catch (JSONException ex) {
-			callbackContext.error("Failed to serialize date. " + calendar.getTime().toString());
+			callbackContext.error("Failed to serialize date. " + selectedDate.toString());
 		} finally {
 			_runnable = null;
 		}
