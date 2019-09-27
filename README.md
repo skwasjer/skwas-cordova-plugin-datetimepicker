@@ -14,7 +14,7 @@ or for latest
 
 ## Supported platforms
 
-- Android 8 and higher
+- Android 4.4 and higher
 - iOS 10 and higher
 - Cordova 7
 
