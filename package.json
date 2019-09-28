@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
+  "version": "2.0.1",
   "name": "skwas-cordova-plugin-datetimepicker",
   "cordova_name": "DateTime picker",
   "description": "Cordova DateTime picker plugin",
@@ -13,7 +13,10 @@
     "cordova-android",
     "cordova-ios",
     "cordova",
-    "datetime"
+    "datetime",
+    "datetimepicker",
+    "datepicker",
+    "timepicker"
   ],
   "platforms": [
     "android",

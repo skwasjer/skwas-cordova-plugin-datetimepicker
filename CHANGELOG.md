@@ -3,6 +3,12 @@
 
 Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
+## 2.0.1
+
+### Fixes
+
+- fix: Lower API level 26 requirement introduced in v2.0.0 down to API level 19.
+
 ## 2.0.0
 
 ### New
