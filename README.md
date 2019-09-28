@@ -46,6 +46,7 @@ This was the original way to call the plugin, and is kept for compatibility.
 | okText              | String              | "Select"       | ![Supported][supported]    | ![Supported][supported]    | The text to use for the ok button |
 | cancelText          | String              | "Cancel"       | ![Supported][supported]    | ![Supported][supported]    | The text to use for the cancel button |
 | clearText           | String              |                | ![Supported][supported]    |                            | The text to use for the clear button |
+| titleText           | String              |                | Depends&#160;on&#160;theme |                            | The text to use for the dialog title |
 | success             | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The success callback |
 | cancel              | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The cancel callback |
 | error               | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The error callback |

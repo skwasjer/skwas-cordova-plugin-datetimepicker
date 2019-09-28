@@ -49,6 +49,7 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		okText: null,
 		cancelText: null,
 		clearText: null,
+		titleText: null,
 		android: {
 			theme: undefined,	// If omitted/undefined, default theme will be used.
 			calendar: false

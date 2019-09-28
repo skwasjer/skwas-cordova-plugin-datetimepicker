@@ -40,6 +40,7 @@ public class DateTimePicker extends CordovaPlugin {
 		public boolean allowFutureDates = true;
 		public int minuteInterval = 1;
 		public String locale = "EN";
+		public String titleText = null;
 		public String okText = null;
 		public String cancelText = null;
 		public String clearText = null;
@@ -72,6 +73,10 @@ public class DateTimePicker extends CordovaPlugin {
 					: (maxDate = allowFutureDates ? _maxSupportedDate : now);
 
 			minuteInterval = obj.optInt("minuteInterval", minuteInterval);
+
+			if (!obj.isNull("titleText")) {
+				titleText = obj.optString("titleText");
+			}
 
 			if (!obj.isNull("okText")) {
 				okText = obj.optString("okText");
@@ -242,6 +247,7 @@ public class DateTimePicker extends CordovaPlugin {
 						calendar.get(Calendar.DAY_OF_MONTH)
 				);
 
+				dateDialog.setPermanentTitle(options.titleText);
 				dateDialog.setOkText(options.okText);
 				dateDialog.setCancelText(options.cancelText);
 				dateDialog.setCalendarEnabled(options.calendar);
@@ -291,7 +297,7 @@ public class DateTimePicker extends CordovaPlugin {
 		if (TextUtils.isEmpty(clearText)) {
 			return;
 		}
-		
+
 		dialog.setButton(DialogInterface.BUTTON_NEUTRAL, clearText, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {

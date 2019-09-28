@@ -19,6 +19,7 @@ interface IDatePickerOptions {
   okText?: string;
   cancelText?: string;
   clearText?: string;
+  titleText?: string;
   android?: {
     theme?: number; // Theme_DeviceDefault_Dialog
     calendar?: boolean;
