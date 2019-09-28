@@ -122,7 +122,7 @@
 - (void)configureDatePicker:(NSMutableDictionary *)optionsOrNil datePicker:(UIDatePicker *)datePicker;
 {
     long long ticks = [[optionsOrNil objectForKey:@"ticks"] longLongValue];
-    
+
     // Locale
     NSString *localeString = [optionsOrNil objectForKeyNotNull:@"locale"] ?: @"";
     if (localeString.length == 0)
@@ -130,15 +130,15 @@
         localeString = @"EN";
     }
     datePicker.locale = [[NSLocale alloc] initWithLocaleIdentifier:localeString];
-    
+
     // OK
     NSString *okTextString = [optionsOrNil objectForKeyNotNull:@"okText"] ?: @"";
     if (okTextString.length == 0)
     {
-        okTextString = @"Select";
+        okTextString = @"Done";
     }
     self.modalPicker.dismissText = okTextString;
-    
+
     // Cancel
     NSString *cancelTextString = [optionsOrNil objectForKeyNotNull:@"cancelText"] ?: @"";
     if (cancelTextString.length == 0)
@@ -146,11 +146,11 @@
         cancelTextString = @"Cancel";
     }
     self.modalPicker.cancelText = cancelTextString;
-    
+
     // Allow old/future dates
     BOOL allowOldDates = ([[optionsOrNil objectForKeyNotNull:@"allowOldDates"] ?: [NSNumber numberWithInt:1] intValue]) == 1 ? YES : NO;
     BOOL allowFutureDates = ([[optionsOrNil objectForKeyNotNull:@"allowFutureDates"] ?: [NSNumber numberWithInt:1] intValue]) == 1 ? YES : NO;
-    
+
     // Min/max dates
     long long nowTicks = ((long long)[[NSDate date] timeIntervalSince1970]) * DDBIntervalFactor;
     long long minDateTicks = [[optionsOrNil objectForKeyNotNull:@"minDateTicks"] ?: [NSNumber numberWithLong:(allowOldDates ? DDBMinDate : nowTicks)] longLongValue];
@@ -161,7 +161,7 @@
     }
     datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:(minDateTicks / DDBIntervalFactor)];
     datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:(maxDateTicks / DDBIntervalFactor)];
-    
+
     // Mode
     NSString *mode = [optionsOrNil objectForKey:@"mode"];
     if ([mode isEqualToString:@"date"])
@@ -176,7 +176,7 @@
     {
         datePicker.datePickerMode = UIDatePickerModeDateAndTime;
     }
-    
+
     // Minute interval
     NSInteger minuteInterval = [[optionsOrNil objectForKeyNotNull:@"minuteInterval"] ?: [NSNumber numberWithInt:1] intValue];
     datePicker.minuteInterval = minuteInterval;
