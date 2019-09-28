@@ -42,6 +42,7 @@ public class DateTimePicker extends CordovaPlugin {
 		public String locale = "EN";
 		public String okText = null;
 		public String cancelText = null;
+		public String clearText = null;
 
 		// Android specific
 		public int theme = android.R.style.Theme_DeviceDefault_Dialog;
@@ -81,6 +82,10 @@ public class DateTimePicker extends CordovaPlugin {
 				cancelText = obj.optString("cancelText");
 			}
 			cancelText = TextUtils.isEmpty(cancelText) ? _activity.getString(android.R.string.cancel) : cancelText;
+
+			if (!obj.isNull("clearText")) {
+				clearText = obj.optString("clearText");
+			}
 
 			JSONObject androidOptions = obj.optJSONObject("android");
 			if (androidOptions != null) {
@@ -218,7 +223,7 @@ public class DateTimePicker extends CordovaPlugin {
 				timeDialog.setOkText(options.okText);
 				timeDialog.setCancelText(options.cancelText);
 
-				showDialog(timeDialog, callbackContext);
+				showDialog(timeDialog, callbackContext, options);
 			}
 		};
 	}
@@ -246,7 +251,7 @@ public class DateTimePicker extends CordovaPlugin {
 				dp.setMinDate(options.minDate.getTime());
 				dp.setMaxDate(options.maxDate.getTime());
 
-				showDialog(dateDialog, callbackContext);
+				showDialog(dateDialog, callbackContext, options);
 			}
 		};
 	}
@@ -257,9 +262,11 @@ public class DateTimePicker extends CordovaPlugin {
 	 * @param dialog          The dialog to show.
 	 * @param callbackContext The callback context.
 	 */
-	private synchronized void showDialog(final AlertDialog dialog, final CallbackContext callbackContext) {
+	private synchronized void showDialog(final AlertDialog dialog, final CallbackContext callbackContext, final DateTimePickerOptions options) {
 		dialog.setCancelable(true);
 		dialog.setCanceledOnTouchOutside(false);
+
+		setClearButton(dialog, callbackContext, options.clearText);
 
 		dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 			@Override
@@ -278,6 +285,24 @@ public class DateTimePicker extends CordovaPlugin {
 
 		_dialog = dialog;
 		dialog.show();
+	}
+
+	private void setClearButton(AlertDialog dialog, CallbackContext callbackContext, String clearText) {
+		if (TextUtils.isEmpty(clearText)) {
+			return;
+		}
+		
+		dialog.setButton(DialogInterface.BUTTON_NEUTRAL, clearText, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				try {
+					// Send empty object.
+					callbackContext.success(new JSONObject());
+				} finally {
+					_runnable = null;
+				}
+			}
+		});
 	}
 
 	/**

@@ -16,6 +16,7 @@ const optionsFull: IDatePickerOptions = {
   locale: 'en_GB',
   okText: 'Select',
   cancelText: 'Cancel',
+  clearText: 'Clear',
   android: {
     theme: 5, // Theme_DeviceDefault_Dialog
     calendar: false,

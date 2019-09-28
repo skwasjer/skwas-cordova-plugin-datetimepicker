@@ -45,6 +45,7 @@ This was the original way to call the plugin, and is kept for compatibility.
 | locale              | String              | "EN"           | -                          | ![Supported][supported]    | The locale to use for text and date/time |
 | okText              | String              | "Select"       | ![Supported][supported]    | ![Supported][supported]    | The text to use for the ok button |
 | cancelText          | String              | "Cancel"       | ![Supported][supported]    | ![Supported][supported]    | The text to use for the cancel button |
+| clearText           | String              |                | ![Supported][supported]    |                            | The text to use for the clear button |
 | success             | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The success callback |
 | cancel              | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The cancel callback |
 | error               | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The error callback |
@@ -78,13 +79,19 @@ function onDeviceReady() {
         locale: "EN",
         okText: "Select",
         cancelText: "Cancel",
+        clearText: "Clear",
         android: {
             theme: 16974126, // Theme_DeviceDefault_Dialog
             is24HourView: true
         },
         success: function(newDate) {
             // Handle new date.
-            console.info(newDate);
+            if (typeof newDate === "undefined") {
+                console.info("Date is cleared.");
+            }
+            else {
+                console.info(newDate);
+            }
             myDate = newDate;
         },
         cancel: function() {
@@ -97,6 +104,8 @@ function onDeviceReady() {
     });
 }
 ```
+
+> When the `clearText` property is provided, an extra button will be shown to clear the date. When the user taps the button, the dialog is closed and the `success` callback called with an `undefined` date.
 
 ### hide
 

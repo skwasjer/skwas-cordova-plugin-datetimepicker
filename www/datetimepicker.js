@@ -48,6 +48,7 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		locale: "EN",
 		okText: null,
 		cancelText: null,
+		clearText: null,
 		android: {
 			theme: undefined,	// If omitted/undefined, default theme will be used.
 			calendar: false
@@ -87,6 +88,9 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 				} else if (utils.isNumber(result.ticks)) {
 					var resultDate = new Date(result.ticks);
 					utils.isFunction(settings.success) && settings.success.apply(this, [ resultDate ]);
+				}
+				else {
+					utils.isFunction(settings.success) && settings.success.apply(this, []);
 				}
 				return;
 			}
