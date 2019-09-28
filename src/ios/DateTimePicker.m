@@ -119,24 +119,6 @@
     self.modalPicker = picker;
 }
 
-- (NSDate *)getRoundedDate:(NSDate *)inDate minuteInterval:(NSInteger)minuteInterval
-{
-    NSDate *truncatedDate = [self truncateSecondsForDate:inDate];
-    NSDateComponents *dateComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitMinute fromDate:truncatedDate];
-    NSInteger minutes = [dateComponents minute];
-    NSInteger minutesRounded = ( (NSInteger)(minutes / minuteInterval) ) * minuteInterval;
-    NSDate *roundedDate = [[NSDate alloc] initWithTimeInterval:60.0 * (minutesRounded - minutes) sinceDate:truncatedDate];
-    return roundedDate;
-}
-
-- (NSDate *)truncateSecondsForDate:(NSDate *)fromDate;
-{
-    NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
-    NSCalendarUnit unitFlags = NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth |  NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute;
-    NSDateComponents *fromDateComponents = [gregorian components:unitFlags fromDate:fromDate ];
-    return [gregorian dateFromComponents:fromDateComponents];
-}
-
 - (void)configureDatePicker:(NSMutableDictionary *)optionsOrNil datePicker:(UIDatePicker *)datePicker;
 {
     long long ticks = [[optionsOrNil objectForKey:@"ticks"] longLongValue];
@@ -201,7 +183,7 @@
 
     // Set to something else first, to force an update.
     datePicker.date = [NSDate dateWithTimeIntervalSince1970:0];
-    datePicker.date = [self getRoundedDate:[[NSDate alloc] initWithTimeIntervalSince1970:(ticks / DDBIntervalFactor)] minuteInterval:minuteInterval];
+    datePicker.date = [[[NSDate alloc] initWithTimeIntervalSince1970:(ticks / DDBIntervalFactor)] roundToMinuteInterval:minuteInterval];
 }
 
 // Sends the date to the plugin javascript handler.
