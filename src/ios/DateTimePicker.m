@@ -94,24 +94,25 @@
 
 - (void)initPickerView:(UIView*)theWebView
 {
-    ModalPickerViewController *picker = [[ModalPickerViewController alloc]
-                                         initWithHeaderText:@""
-                                         dismissText:@""
-                                         cancelText:@""];
+    ModalPickerViewController *picker = [[ModalPickerViewController alloc] init];
 
     picker.modalPresentationStyle = UIModalPresentationCustom;
     picker.transitioningDelegate = self;
 
-    __weak ModalPickerViewController* weakPicker = picker;
-
-    picker.headerBackgroundColor = [UIColor colorWithRed:0.92f green:0.92f blue:0.92f alpha:0.95f];
-
     picker.dismissedHandler = ^(id sender) {
-        [self callbackSuccessWithJavascript:weakPicker.datePicker.date];
+        ModalPickerViewController *modelPicker = (ModalPickerViewController *)sender;
+        if (modelPicker == nil)
+        {
+            [self callbackSuccessWithJavascript:nil];
+        }
+        else
+        {
+            [self callbackSuccessWithJavascript:modelPicker.datePicker.date];
+        }
         isVisible = NO;
     };
 
-    picker.cancelHandler = ^(id sender) {
+    picker.cancelHandler = ^() {
         [self callbackCancelWithJavascript];
         isVisible = NO;
     };
@@ -122,35 +123,28 @@
 - (void)configureDatePicker:(NSMutableDictionary *)optionsOrNil datePicker:(UIDatePicker *)datePicker;
 {
     long long ticks = [[optionsOrNil objectForKey:@"ticks"] longLongValue];
-
+    
     // Locale
-    NSString *localeString = [optionsOrNil objectForKeyNotNull:@"locale"] ?: @"";
-    if (localeString.length == 0)
+    NSString *localeString = [optionsOrNil objectForKeyNotNull:@"locale"];
+    if (localeString.length > 0)
     {
-        localeString = @"EN";
+        datePicker.locale = [[NSLocale alloc] initWithLocaleIdentifier:localeString];
     }
-    datePicker.locale = [[NSLocale alloc] initWithLocaleIdentifier:localeString];
-
-    // OK
-    NSString *okTextString = [optionsOrNil objectForKeyNotNull:@"okText"] ?: @"";
-    if (okTextString.length == 0)
+    else
     {
-        okTextString = @"Done";
+        datePicker.locale = [NSLocale systemLocale];
     }
-    self.modalPicker.dismissText = okTextString;
-
-    // Cancel
-    NSString *cancelTextString = [optionsOrNil objectForKeyNotNull:@"cancelText"] ?: @"";
-    if (cancelTextString.length == 0)
-    {
-        cancelTextString = @"Cancel";
-    }
-    self.modalPicker.cancelText = cancelTextString;
+    
+    // Texts
+    self.modalPicker.dismissText = [optionsOrNil objectForKeyNotNull:@"okText"];
+    self.modalPicker.cancelText = [optionsOrNil objectForKeyNotNull:@"cancelText"];
+    self.modalPicker.clearText = [optionsOrNil objectForKeyNotNull:@"clearText"];
+    self.modalPicker.titleText = [optionsOrNil objectForKeyNotNull:@"titleText"];
 
     // Allow old/future dates
     BOOL allowOldDates = ([[optionsOrNil objectForKeyNotNull:@"allowOldDates"] ?: [NSNumber numberWithInt:1] intValue]) == 1 ? YES : NO;
     BOOL allowFutureDates = ([[optionsOrNil objectForKeyNotNull:@"allowFutureDates"] ?: [NSNumber numberWithInt:1] intValue]) == 1 ? YES : NO;
-
+    
     // Min/max dates
     long long nowTicks = ((long long)[[NSDate date] timeIntervalSince1970]) * DDBIntervalFactor;
     long long minDateTicks = [[optionsOrNil objectForKeyNotNull:@"minDateTicks"] ?: [NSNumber numberWithLong:(allowOldDates ? DDBMinDate : nowTicks)] longLongValue];
@@ -161,7 +155,7 @@
     }
     datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:(minDateTicks / DDBIntervalFactor)];
     datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:(maxDateTicks / DDBIntervalFactor)];
-
+    
     // Mode
     NSString *mode = [optionsOrNil objectForKey:@"mode"];
     if ([mode isEqualToString:@"date"])
@@ -176,7 +170,7 @@
     {
         datePicker.datePickerMode = UIDatePickerModeDateAndTime;
     }
-
+    
     // Minute interval
     NSInteger minuteInterval = [[optionsOrNil objectForKeyNotNull:@"minuteInterval"] ?: [NSNumber numberWithInt:1] intValue];
     datePicker.minuteInterval = minuteInterval;
@@ -189,10 +183,14 @@
 // Sends the date to the plugin javascript handler.
 - (void)callbackSuccessWithJavascript:(NSDate *)date
 {
-    long long ticks = ((long long)[date timeIntervalSince1970]) * DDBIntervalFactor;
     NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
-    [result setObject:[NSNumber numberWithLongLong:ticks] forKey:@"ticks"];
-
+    // When date is nil, user clicked 'clear' button so we dispatch success without ticks in that case.
+    if (date != nil)
+    {
+        long long ticks = ((long long)[date timeIntervalSince1970]) * DDBIntervalFactor;
+        [result setObject:[NSNumber numberWithLongLong:ticks] forKey:@"ticks"];
+    }
+    
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
