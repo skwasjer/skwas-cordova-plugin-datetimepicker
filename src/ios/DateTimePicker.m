@@ -132,7 +132,7 @@
     }
     else
     {
-        datePicker.locale = [NSLocale systemLocale];
+        datePicker.locale = [NSLocale currentLocale];
     }
     
     // Texts

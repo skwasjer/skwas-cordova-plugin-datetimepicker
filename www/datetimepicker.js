@@ -45,7 +45,7 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		allowOldDates: null,
 		allowFutureDates: null,
 		minuteInterval: 1,
-		locale: "EN",
+		locale: null,
 		okText: null,
 		cancelText: null,
 		clearText: null,
