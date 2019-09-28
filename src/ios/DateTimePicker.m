@@ -1,4 +1,5 @@
 #import "DateTimePicker.h"
+#import "Extensions.h"
 #import "ModalPickerViewController.h"
 #import "TransparentCoverVerticalAnimator.h"
 
@@ -138,41 +139,64 @@
 
 - (void)configureDatePicker:(NSMutableDictionary *)optionsOrNil datePicker:(UIDatePicker *)datePicker;
 {
-    NSString *mode = [optionsOrNil objectForKey:@"mode"];
     long long ticks = [[optionsOrNil objectForKey:@"ticks"] longLongValue];
-    NSString *localeString = [optionsOrNil objectForKey:@"locale"];
-    NSString *okTextString = [optionsOrNil objectForKey:@"okText"];
-    NSString *cancelTextString = [optionsOrNil objectForKey:@"cancelText"];
-    BOOL allowOldDates = [[optionsOrNil objectForKey:@"allowOldDates"] intValue] == 1 ? YES : NO;
-    BOOL allowFutureDates = [[optionsOrNil objectForKey:@"allowFutureDates"] intValue] == 1 ? YES : NO;
-    long long nowTicks = ((long long)[[NSDate date] timeIntervalSince1970]) * DDBIntervalFactor;
-    long long minDateTicks = [[optionsOrNil objectForKey:@"minDateTicks"] ?: [NSNumber numberWithLong:(allowOldDates ? DDBMinDate : nowTicks)] longLongValue];
-    long long maxDateTicks = [[optionsOrNil objectForKey:@"maxDateTicks"] ?: [NSNumber numberWithLong:(allowFutureDates ? DDBMaxDate : nowTicks)] longLongValue];
-    NSInteger minuteInterval = [[optionsOrNil objectForKey:@"minuteInterval"] intValue];
-
-    if (localeString == nil || localeString.length == 0) localeString = @"EN";
+    
+    // Locale
+    NSString *localeString = [optionsOrNil objectForKeyNotNull:@"locale"] ?: @"";
+    if (localeString.length == 0)
+    {
+        localeString = @"EN";
+    }
     datePicker.locale = [[NSLocale alloc] initWithLocaleIdentifier:localeString];
-
-    if (okTextString == nil || okTextString.length == 0) okTextString = @"Select";
-    if (cancelTextString == nil || cancelTextString.length == 0) cancelTextString = @"Cancel";
-
+    
+    // OK
+    NSString *okTextString = [optionsOrNil objectForKeyNotNull:@"okText"] ?: @"";
+    if (okTextString.length == 0)
+    {
+        okTextString = @"Select";
+    }
     self.modalPicker.dismissText = okTextString;
+    
+    // Cancel
+    NSString *cancelTextString = [optionsOrNil objectForKeyNotNull:@"cancelText"] ?: @"";
+    if (cancelTextString.length == 0)
+    {
+        cancelTextString = @"Cancel";
+    }
     self.modalPicker.cancelText = cancelTextString;
-
+    
+    // Allow old/future dates
+    BOOL allowOldDates = ([[optionsOrNil objectForKeyNotNull:@"allowOldDates"] ?: [NSNumber numberWithInt:1] intValue]) == 1 ? YES : NO;
+    BOOL allowFutureDates = ([[optionsOrNil objectForKeyNotNull:@"allowFutureDates"] ?: [NSNumber numberWithInt:1] intValue]) == 1 ? YES : NO;
+    
+    // Min/max dates
+    long long nowTicks = ((long long)[[NSDate date] timeIntervalSince1970]) * DDBIntervalFactor;
+    long long minDateTicks = [[optionsOrNil objectForKeyNotNull:@"minDateTicks"] ?: [NSNumber numberWithLong:(allowOldDates ? DDBMinDate : nowTicks)] longLongValue];
+    long long maxDateTicks = [[optionsOrNil objectForKeyNotNull:@"maxDateTicks"] ?: [NSNumber numberWithLong:(allowFutureDates ? DDBMaxDate : nowTicks)] longLongValue];
     if (minDateTicks > maxDateTicks)
     {
         minDateTicks = DDBMinDate;
     }
     datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:(minDateTicks / DDBIntervalFactor)];
     datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:(maxDateTicks / DDBIntervalFactor)];
-
+    
+    // Mode
+    NSString *mode = [optionsOrNil objectForKey:@"mode"];
     if ([mode isEqualToString:@"date"])
+    {
         datePicker.datePickerMode = UIDatePickerModeDate;
+    }
     else if ([mode isEqualToString:@"time"])
+    {
         datePicker.datePickerMode = UIDatePickerModeTime;
+    }
     else
+    {
         datePicker.datePickerMode = UIDatePickerModeDateAndTime;
-
+    }
+    
+    // Minute interval
+    NSInteger minuteInterval = [[optionsOrNil objectForKeyNotNull:@"minuteInterval"] ?: [NSNumber numberWithInt:1] intValue];
     datePicker.minuteInterval = minuteInterval;
 
     // Set to something else first, to force an update.
@@ -202,4 +226,3 @@
 }
 
 @end
-
