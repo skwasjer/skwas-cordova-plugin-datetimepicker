@@ -141,20 +141,26 @@
     self.modalPicker.clearText = [optionsOrNil objectForKeyNotNull:@"clearText"];
     self.modalPicker.titleText = [optionsOrNil objectForKeyNotNull:@"titleText"];
 
+    // Minute interval
+    NSInteger minuteInterval = [[optionsOrNil objectForKeyNotNull:@"minuteInterval"] ?: [NSNumber numberWithInt:1] intValue];
+    datePicker.minuteInterval = minuteInterval;
+    
     // Allow old/future dates
     BOOL allowOldDates = ([[optionsOrNil objectForKeyNotNull:@"allowOldDates"] ?: [NSNumber numberWithInt:1] intValue]) == 1 ? YES : NO;
     BOOL allowFutureDates = ([[optionsOrNil objectForKeyNotNull:@"allowFutureDates"] ?: [NSNumber numberWithInt:1] intValue]) == 1 ? YES : NO;
     
     // Min/max dates
-    long long nowTicks = ((long long)[[NSDate date] timeIntervalSince1970]) * DDBIntervalFactor;
-    long long minDateTicks = [[optionsOrNil objectForKeyNotNull:@"minDateTicks"] ?: [NSNumber numberWithLong:(allowOldDates ? DDBMinDate : nowTicks)] longLongValue];
-    long long maxDateTicks = [[optionsOrNil objectForKeyNotNull:@"maxDateTicks"] ?: [NSNumber numberWithLong:(allowFutureDates ? DDBMaxDate : nowTicks)] longLongValue];
+    NSDate *today = [NSDate today];
+    long long todayTicks = ((long long)[today timeIntervalSince1970]) * DDBIntervalFactor;
+    long long endOfTodayTicks = ((long long)[[[today addDay:1] addSecond:-1] timeIntervalSince1970]) * DDBIntervalFactor;
+    long long minDateTicks = [[optionsOrNil objectForKeyNotNull:@"minDateTicks"] ?: [NSNumber numberWithLong:(allowOldDates ? DDBMinDate : todayTicks)] longLongValue];
+    long long maxDateTicks = [[optionsOrNil objectForKeyNotNull:@"maxDateTicks"] ?: [NSNumber numberWithLong:(allowFutureDates ? DDBMaxDate : endOfTodayTicks)] longLongValue];
     if (minDateTicks > maxDateTicks)
     {
         minDateTicks = DDBMinDate;
     }
-    datePicker.minimumDate = [NSDate dateWithTimeIntervalSince1970:(minDateTicks / DDBIntervalFactor)];
-    datePicker.maximumDate = [NSDate dateWithTimeIntervalSince1970:(maxDateTicks / DDBIntervalFactor)];
+    datePicker.minimumDate = [[NSDate dateWithTimeIntervalSince1970:(minDateTicks / DDBIntervalFactor)] roundDownToMinuteInterval:minuteInterval];
+    datePicker.maximumDate = [[NSDate dateWithTimeIntervalSince1970:(maxDateTicks / DDBIntervalFactor)] roundUpToMinuteInterval:minuteInterval];
     
     // Mode
     NSString *mode = [optionsOrNil objectForKey:@"mode"];
@@ -171,13 +177,7 @@
         datePicker.datePickerMode = UIDatePickerModeDateAndTime;
     }
     
-    // Minute interval
-    NSInteger minuteInterval = [[optionsOrNil objectForKeyNotNull:@"minuteInterval"] ?: [NSNumber numberWithInt:1] intValue];
-    datePicker.minuteInterval = minuteInterval;
-
-    // Set to something else first, to force an update.
-    datePicker.date = [NSDate dateWithTimeIntervalSince1970:0];
-    datePicker.date = [[[NSDate alloc] initWithTimeIntervalSince1970:(ticks / DDBIntervalFactor)] roundToMinuteInterval:minuteInterval];
+    [datePicker setDate:[[NSDate dateWithTimeIntervalSince1970:(ticks / DDBIntervalFactor)] roundToMinuteInterval:minuteInterval] animated:FALSE];
 }
 
 // Sends the date to the plugin javascript handler.
