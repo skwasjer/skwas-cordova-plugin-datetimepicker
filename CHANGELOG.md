@@ -3,11 +3,27 @@
 
 Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
+## 2.1.0
+
+### New
+
+- Android/iOS: add `clearText` property which - when specified - adds a button with intend to clear the current date. When the user taps this button, the `success` callback will be called with an `undefined` date and the picker is closed. Backwards compatible due to having to opt-in.
+- Android/iOS: add `titleText` property which when specified sets the dialog title.
+
+### Changes
+
+- Android/iOS: remove default button texts, instead use OS defaults.
+- iOS: remove default locale, instead use the user locale.
+
+### Fixes
+
+- iOS: (#33) fix picker sometimes showing 1 januari when using `minuteInterval` > 1 and `allowOldDates` or `allowFutureDates` is set to `false`.
+
 ## 2.0.1
 
 ### Fixes
 
-- fix: Lower API level 26 requirement introduced in v2.0.0 down to API level 19.
+- Android: Lower API level 26 requirement introduced in v2.0.0 down to API level 19.
 
 ## 2.0.0
 
