@@ -42,15 +42,17 @@ This was the original way to call the plugin, and is kept for compatibility.
 | minDate             | Date                |                | ![Supported][supported]    | ![Supported][supported]    | Set the minimum date that can be selected |
 | maxDate             | Date                |                | ![Supported][supported]    | ![Supported][supported]    | Set the maximum date that can be selected |
 | minuteInterval      | int                 | 1              | >= Honeycomb               | ![Supported][supported]    | For minute spinner the number of minutes per step |
-| locale              | String              | "EN"           | -                          | ![Supported][supported]    | The locale to use for text and date/time |
-| okText              | String              | "Select"       | ![Supported][supported]    | ![Supported][supported]    | The text to use for the ok button |
-| cancelText          | String              | "Cancel"       | ![Supported][supported]    | ![Supported][supported]    | The text to use for the cancel button |
-| clearText           | String              |                | ![Supported][supported]    |                            | The text to use for the clear button |
-| titleText           | String              |                | Depends&#160;on&#160;theme |                            | The text to use for the dialog title |
+| locale              | String              | (user default) | -                          | ![Supported][supported]    | The locale to use for text and date/time |
+| okText              | String              | (os default)   | ![Supported][supported]    | ![Supported][supported]    | The text to use for the ok button |
+| cancelText          | String              | (os default)   | ![Supported][supported]    | ![Supported][supported]    | The text to use for the cancel button |
+| clearText           | String              |                | ![Supported][supported]    | ![Supported][supported]    | The text to use for the clear button |
+| titleText           | String              |                | Depends&#160;on&#160;theme | ![Supported][supported]    | The text to use for the dialog title |
 | success             | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The success callback |
 | cancel              | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The cancel callback |
 | error               | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The error callback |
 | android             | Object              | {}             | optional                   | ignored                    | Android specific options |
+
+> When providing the `clearText` property, an extra button is shown with intend to clear the current date. When the user taps this button, the `success` callback will be called with an `undefined` date. From a UI perspective, this button should be hidden by application code when no date is currently set by omitting the property, but this is up to you.
 
 #### Android options
 
@@ -71,42 +73,15 @@ function onDeviceReady() {
 
     cordova.plugins.DateTimePicker.show({
         mode: "date",
-        date: myDate,
-        allowOldDates: true,
-        allowFutureDates: true,
-        minDate: new Date(),
-        maxDate: null,
-        minuteInterval: 15,
-        locale: "EN",
-        okText: "Select",
-        cancelText: "Cancel",
-        clearText: "Clear",
-        android: {
-            theme: 16974126, // Theme_DeviceDefault_Dialog
-            is24HourView: true
-        },
+        date: myDate
         success: function(newDate) {
             // Handle new date.
-            if (typeof newDate === "undefined") {
-                console.info("Date is cleared.");
-            }
-            else {
-                console.info(newDate);
-            }
+            console.info(newDate);
             myDate = newDate;
-        },
-        cancel: function() {
-            console.info("Cancelled");
-        },
-        error: function (err) {
-            // Handle error.
-            console.error(err);
         }
     });
 }
 ```
-
-> When the `clearText` property is provided, an extra button will be shown to clear the date. When the user taps the button, the dialog is closed and the `success` callback called with an `undefined` date.
 
 ### hide
 
