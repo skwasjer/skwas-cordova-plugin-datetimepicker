@@ -153,8 +153,8 @@
     NSDate *today = [NSDate today];
     long long todayTicks = ((long long)[today timeIntervalSince1970]) * DDBIntervalFactor;
     long long endOfTodayTicks = ((long long)[[[today addDay:1] addSecond:-1] timeIntervalSince1970]) * DDBIntervalFactor;
-    long long minDateTicks = [[optionsOrNil objectForKeyNotNull:@"minDateTicks"] ?: [NSNumber numberWithLong:(allowOldDates ? DDBMinDate : todayTicks)] longLongValue];
-    long long maxDateTicks = [[optionsOrNil objectForKeyNotNull:@"maxDateTicks"] ?: [NSNumber numberWithLong:(allowFutureDates ? DDBMaxDate : endOfTodayTicks)] longLongValue];
+    long long minDateTicks = [[optionsOrNil objectForKeyNotNull:@"minDateTicks"] ?: [NSNumber numberWithLongLong:(allowOldDates ? DDBMinDate : todayTicks)] longLongValue];
+    long long maxDateTicks = [[optionsOrNil objectForKeyNotNull:@"maxDateTicks"] ?: [NSNumber numberWithLongLong:(allowFutureDates ? DDBMaxDate : endOfTodayTicks)] longLongValue];
     if (minDateTicks > maxDateTicks)
     {
         minDateTicks = DDBMinDate;
