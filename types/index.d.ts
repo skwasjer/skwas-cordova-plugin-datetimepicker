@@ -18,12 +18,14 @@ interface IDatePickerOptions {
   locale?: string;
   okText?: string;
   cancelText?: string;
+  clearText?: string;
+  titleText?: string;
   android?: {
     theme?: number; // Theme_DeviceDefault_Dialog
     calendar?: boolean;
     is24HourView?: boolean;
   };
-  success: (newDate: Date) => void;
+  success: (newDate?: Date) => void;
   cancel?: () => void;
   error: (err: Error) => void;
 }
@@ -44,11 +46,11 @@ interface DateTimePicker {
    * NOTE: The successCallback and errorCallback respectively will be ignored if the success or error callback is provided on the options argument.
    *
    * @param {IDatePickerOptions} options
-   * @param {(newDate: Date) => void} successCb
+   * @param {(newDate?: Date) => void} successCb
    * @param {(err: Error) => void} errorCb
    * @memberof DateTimePicker
    */
-  show(options: IDatePickerOptions, successCb: (newDate: Date) => void, errorCb: (err: Error) => void): void;
+  show(options: IDatePickerOptions, successCb: (newDate?: Date) => void, errorCb: (err: Error) => void): void;
 
   /**
    * Hide the date/time picker.

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
+import android.text.TextUtils;
 import android.widget.DatePicker;
 
 import java.lang.reflect.Method;
@@ -18,6 +19,7 @@ public class DatePickerDialog extends android.app.DatePickerDialog {
 	private final static boolean mShouldFixCallbackDelegate = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
 	private final OnDateSetListener mListener;
 	private DatePicker mDatePicker;
+	private CharSequence mTitle;
 
 	public DatePickerDialog(@NonNull Context context, @Nullable OnDateSetListener listener, int year, int monthOfYear, int dayOfMonth) {
 		super(context, patchListener(listener), year, monthOfYear, dayOfMonth);
@@ -80,6 +82,23 @@ public class DatePickerDialog extends android.app.DatePickerDialog {
 			setSpinnersShown.invoke(dp, !enabled);
 		} catch (Exception ex) {
 			//ex.printStackTrace();
+		}
+	}
+
+	public void setPermanentTitle(CharSequence title) {
+		mTitle = title;
+		if (!TextUtils.isEmpty(mTitle)) {
+			setTitle(title);
+		}
+	}
+
+	@Override
+	public void onDateChanged(@NonNull DatePicker view, int year, int month, int dayOfMonth) {
+		super.onDateChanged(view, year, month, dayOfMonth);
+
+		// If set, enforce title.
+		if (!TextUtils.isEmpty(mTitle)) {
+			setTitle(mTitle);
 		}
 	}
 

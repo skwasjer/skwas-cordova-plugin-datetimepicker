@@ -1,20 +1,16 @@
 #import <UIKit/UIKit.h>
 
-@interface ModalPickerViewController : UIViewController
-{
+@interface ModalPickerViewController : UIViewController {
 }
 
-- (id)initWithHeaderText:(NSString*)headerText
-             dismissText:(NSString*)dismissText
-             cancelText:(NSString*)cancelText;
+- (id)init;
 
-@property (strong) UIColor *headerBackgroundColor;
-@property (strong) UIColor *headerTextColor;
-@property (strong) NSString *headerText;
-@property (strong) NSString *dismissText;
+@property (strong) NSString *titleText;
+@property (strong) NSString *doneText;
 @property (strong) NSString *cancelText;
+@property (strong) NSString *clearText;
 @property (strong) UIDatePicker *datePicker;
-@property (nonatomic, strong) void (^dismissedHandler)(id sender);
-@property (nonatomic, strong) void (^cancelHandler)(id sender);
+@property (nonatomic, strong) void (^doneHandler)(id sender);
+@property (nonatomic, strong) void (^cancelHandler)();
 
 @end
