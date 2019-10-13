@@ -8,7 +8,7 @@ Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 ### New
 
 - iOS: added iOS 13 dark mode support ([#35](https://github.com/skwasjer/skwas-cordova-plugin-datetimepicker/issues/35)).
-- Android/iOS: add `clearText` property which - when specified - adds a button with intend to clear the current date. When the user taps this button, the `success` callback will be called with an `undefined` date and the picker is closed. Backwards compatible due to having to opt-in.
+- Android/iOS: add `clearText` property which - when specified - adds a button with intent to clear the current date. When the user taps this button, the `success` callback will be called with an `undefined` date and the picker is closed. Backwards compatible due to having to opt-in.
 - Android/iOS: add `titleText` property which when specified sets the dialog title.
 
 ### Changes
