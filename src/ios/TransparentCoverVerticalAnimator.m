@@ -27,7 +27,7 @@
         [UIView animateWithDuration:[self transitionDuration:transitionContext] animations:^{
             //fromViewController.view.tintAdjustmentMode = UIViewTintAdjustmentModeDimmed;
             toViewController.view.frame = endRect;
-            fromViewController.view.alpha = 0.5f;
+            fromViewController.view.alpha = 0.8f;
         } completion:^(BOOL finished) {
             [transitionContext completeTransition:YES];
         }];
