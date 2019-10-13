@@ -7,17 +7,20 @@ Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
 ### New
 
+- iOS: added iOS 13 dark mode support ([#35](https://github.com/skwasjer/skwas-cordova-plugin-datetimepicker/issues/35)).
 - Android/iOS: add `clearText` property which - when specified - adds a button with intend to clear the current date. When the user taps this button, the `success` callback will be called with an `undefined` date and the picker is closed. Backwards compatible due to having to opt-in.
 - Android/iOS: add `titleText` property which when specified sets the dialog title.
 
 ### Changes
 
-- Android/iOS: remove default button texts, instead use OS defaults.
-- iOS: remove default locale, instead use the user locale.
+- Android/iOS: removed default button texts. Instead, now OS defaults are used.
+- iOS: removed default locale 'EN'. Instead, the user locale is used.
+- iOS: refactored to use `UINavigationBar` and Auto Layout.
+- iOS: made modal background slightly less opaque.
 
 ### Fixes
 
-- iOS: (#33) fix picker sometimes showing 1 januari when using `minuteInterval` > 1 and `allowOldDates` or `allowFutureDates` is set to `false`.
+- iOS: ([#33](https://github.com/skwasjer/skwas-cordova-plugin-datetimepicker/issues/33)) fix picker sometimes showing 1 januari when using `minuteInterval` > 1 and `allowOldDates` or `allowFutureDates` is set to `false`.
 
 ## 2.0.1
 
@@ -46,7 +49,7 @@ Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
 ## 1.1.3
 
-- Android: Due to a [known bug](https://issuetracker.google.com/issues/36951008), when cancelling on Jelly Bean and KitKat, the cancel callback was not called. Instead the success callback was called. Fixes #18.
+- Android: Due to a [known bug](https://issuetracker.google.com/issues/36951008), when cancelling on Jelly Bean and KitKat, the cancel callback was not called. Instead the success callback was called. Fixes [#18](https://github.com/skwasjer/skwas-cordova-plugin-datetimepicker/issues/18).
 
 ## 1.1.2
 
@@ -74,7 +77,7 @@ Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
 ## 0.9.0
 
-- Android: fixed datetime mode only showing date picker (see #10)
+- Android: fixed datetime mode only showing date picker (see [#10](https://github.com/skwasjer/skwas-cordova-plugin-datetimepicker/issues/10))
 - Android: added theme support
 - Android: added calendar switch
 
