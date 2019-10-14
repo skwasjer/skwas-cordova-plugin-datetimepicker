@@ -73,7 +73,7 @@ function onDeviceReady() {
 
     cordova.plugins.DateTimePicker.show({
         mode: "date",
-        date: myDate
+        date: myDate,
         success: function(newDate) {
             // Handle new date.
             console.info(newDate);
