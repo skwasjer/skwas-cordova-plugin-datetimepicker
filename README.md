@@ -47,12 +47,12 @@ This was the original way to call the plugin, and is kept for compatibility.
 | cancelText          | String              | (os default)   | ![Supported][supported]    | ![Supported][supported]    | The text to use for the cancel button |
 | clearText           | String              |                | ![Supported][supported]    | ![Supported][supported]    | The text to use for the clear button |
 | titleText           | String              |                | Depends&#160;on&#160;theme | ![Supported][supported]    | The text to use for the dialog title |
-| success             | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The success callback |
-| cancel              | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The cancel callback |
-| error               | Function            | -              | ![Supported][supported]    | ![Supported][supported]    | The error callback |
+| success             | Function(date)      | -              | ![Supported][supported]    | ![Supported][supported]    | The success callback |
+| cancel              | Function()          | -              | ![Supported][supported]    | ![Supported][supported]    | The cancel callback |
+| error               | Function(err)       | -              | ![Supported][supported]    | ![Supported][supported]    | The error callback |
 | android             | Object              | {}             | optional                   | ignored                    | Android specific options |
 
-> When providing the `clearText` property, an extra button is shown with intend to clear the current date. When the user taps this button, the `success` callback will be called with an `undefined` date. From a UI perspective, this button should be hidden by application code when no date is currently set by omitting the property, but this is up to you.
+> When providing the `clearText` property, an extra button is shown with intent to clear the current date. When the user taps this button, the `success` callback will be called with an `undefined` date. From a UI perspective, this button should be hidden by application code when no date is currently set by omitting the property, but this is up to you.
 
 #### Android options
 
