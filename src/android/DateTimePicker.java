@@ -293,7 +293,7 @@ public class DateTimePicker extends CordovaPlugin {
 		dialog.show();
 	}
 
-	private void setClearButton(AlertDialog dialog, CallbackContext callbackContext, String clearText) {
+	private void setClearButton(final AlertDialog dialog, final CallbackContext callbackContext, final String clearText) {
 		if (TextUtils.isEmpty(clearText)) {
 			return;
 		}
@@ -317,7 +317,7 @@ public class DateTimePicker extends CordovaPlugin {
 	 * @param calendar        The calendar with the new date and/or time.
 	 * @param callbackContext The callback context.
 	 */
-	private synchronized void onCalendarSet(Calendar calendar, CallbackContext callbackContext) {
+	private synchronized void onCalendarSet(final Calendar calendar, final CallbackContext callbackContext) {
 		Date selectedDate = calendar.getTime();
 
 		try {
