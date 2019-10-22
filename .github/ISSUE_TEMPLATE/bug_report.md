@@ -24,6 +24,9 @@ List Cordova versions by running:
 - `cordova -v`
 - `cordova platform ls`
 
+**Plugin version**
+The version of this plugin...
+
 **Development OS (please complete the following information):**
  - OS: [e.g. Windows, Mac]
 
