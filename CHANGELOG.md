@@ -3,6 +3,12 @@
 
 Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
+## 2.1.1
+
+### Fixes
+
+- Android: build error 'local variable callbackContext is accessed from within inner class; needs to be declared final' ([#37](https://github.com/skwasjer/skwas-cordova-plugin-datetimepicker/issues/37))
+
 ## 2.1.0
 
 ### New
