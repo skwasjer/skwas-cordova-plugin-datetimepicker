@@ -15,8 +15,8 @@ or for latest
 ## Supported platforms
 
 - Android 4.4 and higher
-- iOS 10 and higher
-- Cordova 7
+- iOS 9 and higher (requires Xcode 11)
+- Cordova 7 and higher
 
 ## Methods
 
