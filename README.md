@@ -15,8 +15,7 @@ or for latest
 ## Supported platforms
 
 - Android 4.4 and higher
-- iOS 9 and higher (requires Xcode 11)
-- Cordova 7 and higher
+- iOS 9 and higher
 
 ## Methods
 
@@ -99,6 +98,11 @@ cordova.plugins.DateTimePicker.hide();
 ## Changelog
 
 For a list of all changes  [see here](./CHANGELOG.md).
+
+## Build requirements
+
+- Cordova 7 and higher
+- Xcode 11 and higher (iOS)
 
 ### Contributors
 
