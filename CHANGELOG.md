@@ -3,6 +3,11 @@
 
 Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
+## 2.1.2
+
+### Fixes
+- iOS: Prefer wheels style on iOS 14. #45 (thanks @leMaik)
+
 ## 2.1.1
 
 ### Fixes
