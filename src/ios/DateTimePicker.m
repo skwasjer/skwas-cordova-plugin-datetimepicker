@@ -96,6 +96,11 @@
 
 - (void)configureDatePicker:(NSMutableDictionary *)optionsOrNil datePicker:(UIDatePicker *)datePicker {
     
+    // Prefer wheels style on iOS 14.
+    if (@available(iOS 13.4, *)) {
+        datePicker.preferredDatePickerStyle = UIDatePickerStyleWheels;
+    }
+    
     // Mode (must be set first, otherwise minuteInterval > 1 acts wonky).
     NSString *mode = [optionsOrNil objectForKey:@"mode"];
     if ([mode isEqualToString:@"date"]) {
