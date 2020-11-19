@@ -5,8 +5,8 @@ static const float kHeaderBarHeight = 44;
 static const float kHeaderBarHeightSmall = 32;
 static const float kDatePickerHeight = 200;
 
-@interface ModalPickerViewController()
-
+@interface ModalPickerViewController()<UIGestureRecognizerDelegate>
+@property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
 @end
 
 @implementation ModalPickerViewController {
@@ -17,10 +17,9 @@ static const float kDatePickerHeight = 200;
 
     UIBarButtonItem *_doneButton;
     UIBarButtonItem *_clearButton;
-    UIBarButtonItem *_cancelButton;
 
     NSLayoutConstraint *_navBarHeight;
-    
+
     UIColor *lightBackgroundColor;
     UIColor *lightDatePickerBackgroundColor;
     UIColor *lightButtonLabelColor;
@@ -32,6 +31,9 @@ static const float kDatePickerHeight = 200;
 - (id)init {
     if ((self = [super init])) {
         _datePicker = [[UIDatePicker alloc] init];
+        self.tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doneButtonTapped:)];
+        self.tapGesture.delegate = self;
+        [self.view addGestureRecognizer:self.tapGesture];
     }
 
     return self;
@@ -39,10 +41,10 @@ static const float kDatePickerHeight = 200;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     self.view.backgroundColor = [UIColor clearColor];
     self.view.opaque = NO;
-    
+
     [self createSwatches];
     [self createControls];
 }
@@ -56,21 +58,20 @@ static const float kDatePickerHeight = 200;
         _navigationBar = nil;
         _navigationItem = nil;
         _internalView = nil;
-    
+
         _doneButton = nil;
         _clearButton = nil;
-        _cancelButton = nil;
-        
+
         lightBackgroundColor = nil;
         darkBackgroundColor = nil;
         lightDatePickerBackgroundColor = nil;
         darkDatePickerBackgroundColor = nil;
         lightButtonLabelColor = nil;
         darkButtonLabelColor = nil;
-        
+
         _navBarHeight = nil;
     }
-    
+
     [super didReceiveMemoryWarning];
 }
 
@@ -81,13 +82,12 @@ static const float kDatePickerHeight = 200;
         [self createSwatches];
         [self createControls];
     }
-    
+
     // Update texts.
     _navigationItem.title = _titleText;
 
     _doneButton.title = _doneText != (id)[NSNull null] && _doneText.length > 0 ? _doneText : UIKitLocalizedString(@"Done");
-    _cancelButton.title = _cancelText != (id)[NSNull null] && _cancelText.length > 0 ? _cancelText : UIKitLocalizedString(@"Cancel");
-    
+
     // Show clear button when clear text is set
     if (_clearText != (id)[NSNull null] && _clearText.length > 0) {
         _clearButton.title = _clearText;
@@ -122,12 +122,12 @@ static const float kDatePickerHeight = 200;
     // Create a view that will host our controls.
     _internalView = [[UIView alloc] init];
     _internalView.opaque = FALSE;
-    
+
     // Nav bar
     _navigationBar = [[UINavigationBar alloc] init];
     _navigationBar.translucent = TRUE;
     _navigationBar.opaque = FALSE;
-    
+
     _navigationItem = [[UINavigationItem alloc] init];
     [_navigationBar setItems:@[_navigationItem]];
 
@@ -136,10 +136,7 @@ static const float kDatePickerHeight = 200;
     [_navigationItem setRightBarButtonItem:_doneButton animated:NO];
 
     _clearButton = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:@selector(clearButtonTapped:)];
-    
-    // Left button
-    _cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:@selector(cancelButtonTapped:)];
-    [_navigationItem setLeftBarButtonItem:_cancelButton animated:NO];
+    [_navigationItem setRightBarButtonItem:_clearButton animated:NO];
 
     // Custom hairline above header.
     addHairLine(_internalView.layer, CGSizeMake(0, -1));
@@ -153,7 +150,7 @@ static const float kDatePickerHeight = 200;
     _internalView.translatesAutoresizingMaskIntoConstraints = FALSE;
     _datePicker.translatesAutoresizingMaskIntoConstraints = FALSE;
     _navigationBar.translatesAutoresizingMaskIntoConstraints = FALSE;
-        
+
     NSLayoutConstraint *viewWidth = [NSLayoutConstraint constraintWithItem:_internalView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1 constant:0];
     NSLayoutConstraint *viewHeight = [NSLayoutConstraint constraintWithItem:_internalView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:kHeaderBarHeight + kDatePickerHeight];
     NSLayoutConstraint *viewBottom = [NSLayoutConstraint constraintWithItem:_internalView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1 constant:0];
@@ -174,7 +171,7 @@ static const float kDatePickerHeight = 200;
 }
 
 - (void)createSwatches {
-    lightBackgroundColor = [UIColor colorWithR:240 G:240 B:240 A:1];
+    lightBackgroundColor = [UIColor colorWithR:98 G:98 B:98 A:1];
     darkBackgroundColor = [UIColor colorWithR:67 G:67 B:67 A:1];
     lightDatePickerBackgroundColor = [UIColor colorWithR:209 G:212 B:217 A:1];
     darkDatePickerBackgroundColor = [UIColor colorWithR:87 G:87 B:87 A:1];
@@ -193,7 +190,6 @@ static const float kDatePickerHeight = 200;
     CGFloat largeButtonFontSize = buttonFontSize * 1.15;
     [_doneButton setFont:[UIFont boldSystemFontOfSize:buttonFontSize] highlightedFont:[UIFont boldSystemFontOfSize:largeButtonFontSize]];
     [_clearButton setFont:[UIFont systemFontOfSize:buttonFontSize] highlightedFont:[UIFont systemFontOfSize:largeButtonFontSize]];
-    [_cancelButton setFont:[UIFont systemFontOfSize:buttonFontSize] highlightedFont:[UIFont systemFontOfSize:largeButtonFontSize]];
 
     // Switch between large/small navbar height depending on orientation.
     BOOL isPortrait = self.view.bounds.size.width < self.view.bounds.size.height;
@@ -236,22 +232,16 @@ void addHairLine(CALayer *layer, CGSize shadowOffset) {
 
 - (void)doneButtonTapped:(UIBarButtonItem*)sender {
     [self dismissViewControllerAnimated:true completion:^(void) {
-        // Call the callback.
         if (self.doneHandler != nil) [self doneHandler](self);
     }];
 }
 
-- (void)cancelButtonTapped:(UIBarButtonItem*)sender {
-    [self dismissViewControllerAnimated:true completion:^(void) {
-        // Call the callback.
-        if (self.cancelHandler != nil) [self cancelHandler]();
-    }];
+- (void)clearButtonTapped:(UIBarButtonItem*)sender {
+    if (self.clearHandler != nil) [self clearHandler](self);
 }
 
-- (void)clearButtonTapped:(UIBarButtonItem*)sender {
-    [self dismissViewControllerAnimated:true completion:^(void) {
-        // Call the callback.
-        if (self.doneHandler != nil) [self doneHandler](nil);
-    }];
+#pragma UIGestureRecognizerDelegate
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
+    return touch.view == gestureRecognizer.view;
 }
 @end

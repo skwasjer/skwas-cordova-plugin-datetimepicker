@@ -74,30 +74,15 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
 		settings.error = errorCallback;
 	}
 
-	var onPluginError = utils.getErrorHandler(settings.error).bind(this),
-		onPluginSuccess = function(result) {
-			// The success handler expects the result to be:
-			//
-			// {
-			//    "ticks": a 64-bit int (ticks),
-			//    "cancelled": true|false
-			// }
-			console.debug("DateTimePickerPlugin: Exec 'show' returned:", result);
-			if (utils.isDefined(result) && utils.isObject(result) && result !== null) {
-				if (result.cancelled === true) {
-					utils.isFunction(settings.cancel) && settings.cancel.apply(this);
-				} else if (utils.isNumber(result.ticks)) {
-					var resultDate = new Date(result.ticks);
-					utils.isFunction(settings.success) && settings.success.apply(this, [ resultDate ]);
-				}
-				else {
-					utils.isFunction(settings.success) && settings.success.apply(this, []);
-				}
-				return;
-			}
+	var onPluginError = utils.getErrorHandler(settings.error).bind(this);
+	var onPluginSuccess = function(result) {
+		if (utils.isDefined(result) && utils.isObject(result) && result !== null && result.ticks !== undefined) {
+			utils.isFunction(settings.success) && settings.success.apply(this, [result.ticks]);
+			return;
+		}
 
-			onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
-		}.bind(this);
+		onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
+	}.bind(this);
 
 	// Validate/sanitize options.
 	try {
