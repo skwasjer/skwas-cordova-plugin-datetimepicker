@@ -18,16 +18,39 @@
     "datepicker",
     "timepicker"
   ],
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "npm run coverage",
+    "test:unit": "jasmine --config=./tests/specs/jasmine.json",
+    "coverage": "nyc --check-coverage jasmine --config=./tests/specs/jasmine.json"
+  },
   "platforms": [
     "android",
     "ios"
   ],
-  "engines": [],
+  "engines": {
+    "node": ">=10"
+  },
   "license": "MIT",
   "author": "skwasjer",
   "contributors": [
     "turshija",
     "emanfu",
     "masimplo"
-  ]
+  ],
+  "devDependencies": {
+    "@cordova/eslint-config": "^3.0.0",
+    "eslint": "^7.24.0",
+    "eslint-plugin-es": "^4.1.0",
+    "jasmine": "^3.7.0",
+    "mock-require": "^3.0.3",
+    "nyc": "^15.1.0"
+  },
+  "nyc": {
+    "reporter": [
+      "lcov",
+      "text"
+    ]
+  }
 }

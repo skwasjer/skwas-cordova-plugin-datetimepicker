@@ -1,0 +1,30 @@
+root: true
+extends:
+  - "@cordova/eslint-config/node"
+
+plugins:
+  - es
+
+parserOptions:
+  ecmaFeatures:
+    impliedStrict: true
+
+overrides:
+  - files:
+      - tests/specs/**/*.js
+    extends:
+      - "@cordova/eslint-config/node-tests"
+    rules:
+      quotes: ["error", "double"]
+
+  - files:
+      - www/**/*.js
+    extends:
+      # ES5
+      - "plugin:es/no-new-in-es2015"
+      - "@cordova/eslint-config/browser"
+    rules:
+      quotes: ["error", "double"]
+
+rules:
+  quotes: ["error", "double"]

@@ -5,20 +5,21 @@ end_of_line = crlf
 insert_final_newline = true
 
 [*.{js,java}]
-indent_style = tab
-trim_trailing_whitespace = true
+charset = utf-8
+indent_style = space
+indent_size = 4
+end_of_line = lf
+trim_trailing_whitespace = false
 
-[*.{xml,json}]
+[*.{xml,json,yml,yaml}]
+charset = utf-8
 indent_style = space
 indent_size = 2
+end_of_line = lf
+trim_trailing_whitespace = false
 
 [plugin.xml]
-end_of_line = lf
 indent_size = 4
-
-[*.json]
-end_of_line = lf
-trim_trailing_whitespace = true
 
 [*.{h,m}]
 indent_style = space
