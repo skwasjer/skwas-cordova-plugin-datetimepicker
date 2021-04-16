@@ -1,3 +1,5 @@
 node_modules
 Thumbs.db
 sample/dev*
+coverage
+.nyc_output

@@ -1,86 +1,79 @@
-var cordovaUtils = require('cordova/utils'),
-	utils = exports,
-	modeRegex = /(date|time|datetime)/i;
+/* eslint-dev: plugin:es/no-new-in-es2015 */
 
-utils.isValidMode = modeRegex.test.bind(modeRegex);
+var cordovaUtils = require("cordova/utils");
+var modeRegex = /^(date|time|datetime)$/i;
 
-var is = utils.is = function (value, type) {
-	return typeof value === type;
-}
+exports.isValidMode = modeRegex.test.bind(modeRegex);
 
-utils.isDate = function (val) {
-	return cordovaUtils.typeName(val) === "Date" && !isNaN(val.getTime());
-}
+var is = exports.is = function (value, type) {
+    /* eslint-disable valid-typeof */
+    return typeof value === type;
+    /* eslint-enable valid-typeof */
+};
 
-utils.isUndefined = function (value) {
-	return is(value, "undefined");
-}
+exports.isDate = function (val) {
+    return cordovaUtils.typeName(val) === "Date" && !isNaN(val.getTime());
+};
 
-utils.isDefined = function (value) {
-	return !utils.isUndefined(value);
-}
+var isUndefined = exports.isUndefined = function (value) {
+    return is(value, "undefined");
+};
 
-utils.isFunction = function (value) {
-	return is(value, "function");
-}
+exports.isDefined = function (value) {
+    return !isUndefined(value);
+};
 
-utils.isObject = function (value) {
-	return is(value, "object");
-}
+var isFunction = exports.isFunction = function (value) {
+    return is(value, "function");
+};
 
-utils.isString = function (value) {
-	return is(value, "string");
-}
+exports.isObject = function (value) {
+    return is(value, "object");
+};
 
-utils.isNumber = function (value) {
-	return is(value, "number");
-}
+exports.isString = function (value) {
+    return is(value, "string");
+};
 
-utils.isMinuteInterval = function (i) {
-	i = parseInt(i)
-	return utils.isNumber(i) && !isNaN(i) && i >= 1 && i <= 30 && (60 % i === 0);
-}
+var isNumber = exports.isNumber = function (value) {
+    return is(value, "number");
+};
 
-function copy() {
-	var dst = arguments[0],
-		src = arguments.slice.call()
-
-    for (var key in obj) {
-		if (utils.isDefined(options[key]))
-			settings[key] = options[key];
-	}
-}
+exports.isMinuteInterval = function (i) {
+    i = is(i, "boolean") ? i : i * 1;
+    return isNumber(i) && !isNaN(i) && i >= 1 && i <= 30 && (60 % i === 0);
+};
 
 /**
  * Returns an error handler that logs to console if no callback is provided.
  * @param {Function} callback The external callback to call on error.
  */
-utils.getErrorHandler = function (callback) {
-	return function(err) {
-		if (callback && utils.isFunction(callback)) {
-			console.debug("DateTimePickerPlugin: " + err);
-			callback.apply(this, [ err ]);
-		} else {
-			console.error("DateTimePickerPlugin: " + err);
-		}
-	};
-}
+exports.getErrorHandler = function (callback) {
+    return function (err) {
+        if (callback && isFunction(callback)) {
+            console.debug("DateTimePickerPlugin: " + err);
+            callback.apply(this, [err]);
+        } else {
+            console.error("DateTimePickerPlugin: " + err);
+        }
+    };
+};
 
 /**
  * Validates obj[key] using the provided test. If the test fails, an Error is thrown.
- * @param {Function} test 	The test to execute.
- * @param {Object} obj 		The object to check a value on.
- * @param {String} key 		The key of the value to test.
- * @param {String} message 	The optional error message to append to the default error message.
- * @return			 		true if the test passes. Never returns false (instead will throw).
+ * @param {Function} test   The test to execute.
+ * @param {Object} obj      The object to check a value on.
+ * @param {String} key      The key of the value to test.
+ * @param {String} message  The optional error message to append to the default error message.
+ * @return                  true if the test passes. Never returns false (instead will throw).
  */
-utils.validate = function (test, obj, key, message) {
-	if (!test(obj[key])) {
-		var msg = "The value '" + obj[key] + "' for option '" + key + "' is invalid.";
-		if (message) {
-			msg += " " + message;
-		}
-		throw Error(msg);
-	}
-	return true;
-}
+exports.validate = function (test, obj, key, message) {
+    if (!test(obj[key])) {
+        var msg = "The value '" + obj[key] + "' for option '" + key + "' is invalid.";
+        if (message) {
+            msg += " " + message;
+        }
+        throw Error(msg);
+    }
+    return true;
+};
