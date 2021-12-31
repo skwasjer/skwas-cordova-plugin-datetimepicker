@@ -3,6 +3,13 @@
 
 Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
+## 3.0.0
+
+- Android: use annotations/decorators from AndroidX
+
+### Chores
+- Added coverage/CI scripts
+
 ## 2.1.2
 
 ### Fixes

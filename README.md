@@ -1,4 +1,5 @@
 [![npm version](https://badge.fury.io/js/skwas-cordova-plugin-datetimepicker.svg)](https://badge.fury.io/js/skwas-cordova-plugin-datetimepicker)
+[![Node CI](https://github.com/skwasjer/skwas-cordova-plugin-datetimepicker/actions/workflows/ci.yml/badge.svg)](https://github.com/skwasjer/skwas-cordova-plugin-datetimepicker/actions/workflows/ci.yml)
 
 # skwas-cordova-plugin-datetimepicker
 
@@ -101,8 +102,9 @@ For a list of all changes  [see here](./CHANGELOG.md).
 
 ## Build requirements
 
-- Cordova 7 and higher
-- Xcode 11 and higher (iOS)
+- Cordova 7 or higher
+- Xcode 11 or higher (iOS)
+- Node 12.22.x or higher
 
 ### Contributors
 
