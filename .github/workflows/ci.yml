@@ -4,12 +4,41 @@ on: [push, pull_request]
 
 jobs:
   darwin:
-    name: NodeJS ${{ matrix.node-version }} on ${{ matrix.os }}
+    name: NodeJS ${{ matrix.node-version }} on ${{ matrix.os }}, cordova@${{ matrix.cordova.v }}, cordova-ios@${{ matrix.cordova.ios.v }}, cordova-android@${{ matrix.cordova.android.v }} (Min SDK ${{ matrix.cordova.android.minSdk }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
-        os: [macos-latest]
+        node-version:
+          - 10.x
+          - 12.x
+          - 14.x
+        os:
+          - macos-latest
+        cordova:
+          - v: '8.0.0'
+            ios:
+              v: '5.1.1'
+            android:
+              v: '7.1.4'
+              minSdk: 19
+          - v: '9.0.0'
+            ios:
+              v: '6.2.0'
+            android:
+              v: '9.0.0'
+              minSdk: 22
+          - v: '10.0.0'
+            ios:
+              v: '6.2.0'
+            android:
+              v: '10.0.0'
+              minSdk: 22
+        exclude:
+          # NodeJS 10 deprecated in cordova-android@10
+          - node-version: 10.x
+            cordova:
+              android:
+                v: '10.0.0'
 
     steps:
       - name: Checkout repo
@@ -50,8 +79,8 @@ jobs:
           distribution: adopt
           java-version: 8
 
-      - name: npm install cordova
-        run: npm install cordova@9.0.0 -g
+      - name: npm install cordova@${{ matrix.cordova.v }}
+        run: npm install cordova@${{ matrix.cordova.v }} -g
 
       - name: Cache .gradle
         uses: burrunan/gradle-cache-action@v1
@@ -67,32 +96,86 @@ jobs:
       - name: cordova create
         run: cordova create testApp com.skwas.testApp testApp
 
+      - name: Minimum Android SDK ${{ matrix.cordova.android.minSdk }}
+        run: npm run cordova-preference -- ./testApp android-minSdkVersion ${{ matrix.cordova.android.minSdk }}
+
+      # cordova-android@8 requires shim to enable AndroidX.
+      - name: Enable AndroidX via shim 'cordova-plugin-androidx'
+        if: matrix.cordova.android.v == '8.0.0'
+        working-directory: ./testApp
+        run: cordova plugin add cordova-plugin-androidx
+
+      # cordova-android@9 requires opt-in to AndroidX via config preference.
+      - name: Enable AndroidX
+        if: matrix.cordova.android.v == '9.0.0'
+        run: |
+          npm run cordova-preference -- ./testApp AndroidXEnabled true
+
       - name: cordova plugin add
         working-directory: ./testApp
         run: cordova plugin add ${{ github.workspace }}/plugin
 
-      - name: cordova platform add android
+      - name: cordova platform add android@${{ matrix.cordova.android.v }}
         working-directory: ./testApp
-        run: cordova platform add android
+        run: cordova platform add android@${{ matrix.cordova.android.v }}
 
-      - name: cordova platform add ios
+      # Android SDK Build tools throws error: Build-tool 32.0.0 is missing DX
+      # https://stackoverflow.com/questions/68397703/installed-build-tools-revision-31-0-0-is-corrupted-remove-and-install-again-usi
+      - name: Patch Build Tools
+        if: matrix.cordova.android.v != '8.0.0'
+        run: |
+          cd $ANDROID_SDK_ROOT/build-tools/32.0.0
+          mv d8 dx
+          cd lib
+          mv d8.jar dx.jar
+
+      - name: cordova platform add ios@${{ matrix.cordova.ios.v }}
         working-directory: ./testApp
-        run: cordova platform add ios
+        run: cordova platform add ios@${{ matrix.cordova.ios.v }}
 
       - name: cordova build
         working-directory: ./testApp
         run: cordova build --no-telemetry
 
-
   non-darwin:
-    name: NodeJS ${{ matrix.node-version }} on ${{ matrix.os }}, SDK ${{ matrix.android-sdk }}, AndroidX = ${{ matrix.androidX }}
+    name: NodeJS ${{ matrix.node-version }} on ${{ matrix.os }}, cordova@${{ matrix.cordova.v }}, cordova-android@${{ matrix.cordova.android.v }} (Min SDK ${{ matrix.cordova.android.minSdk }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
-        os: [ubuntu-latest, windows-latest]
-        android-sdk: [default, 19, 29]
-        androidX: [true, false]
+        node-version:
+          - 10.x
+          - 12.x
+          - 14.x
+        os:
+          - ubuntu-latest
+          - windows-latest
+        cordova:
+          - v: '8.0.0'
+            android:
+              v: '7.1.4'
+              minSdk: 19
+          - v: '9.0.0'
+            android:
+              v: '8.0.0'
+              minSdk: 19
+          - v: '9.0.0'
+            android:
+              v: '9.0.0'
+              minSdk: 22
+          - v: '9.0.0'
+            android:
+              v: '10.0.0'
+              minSdk: 22
+          - v: '10.0.0'
+            android:
+              v: '10.0.0'
+              minSdk: 22
+        exclude:
+          # NodeJS 10 deprecated in cordova-android@10
+          - node-version: 10.x
+            cordova:
+              android:
+                v: '10.0.0'
 
     steps:
       - name: Checkout repo
@@ -128,8 +211,8 @@ jobs:
           distribution: adopt
           java-version: 8
 
-      - name: npm install cordova
-        run: npm install cordova@9.0.0 -g
+      - name: npm install cordova@${{ matrix.cordova.v }}
+        run: npm install cordova@${{ matrix.cordova.v }} -g
 
       - name: Cache .gradle
         uses: burrunan/gradle-cache-action@v1
@@ -145,31 +228,45 @@ jobs:
       - name: cordova create
         run: cordova create testApp com.skwas.testApp testApp
 
-      # Build with different SDK's
-      - name: Set Android SDK ${{ matrix.android-sdk }}
-        if: matrix.android-sdk != 'default'
-        run: |
-          npm run cordova-preference -- ./testApp android-targetSdkVersion ${{ matrix.android-sdk }}
-          npm run cordova-preference -- ./testApp android-minSdkVersion ${{ matrix.android-sdk }}
+      - name: Minimum Android SDK ${{ matrix.cordova.android.minSdk }}
+        run: npm run cordova-preference -- ./testApp android-minSdkVersion ${{ matrix.cordova.android.minSdk }}
 
-      # Use cordova-plugin-androidx-adapter plugin to verify shims work.
+      # cordova-android@8 requires shim to enable AndroidX.
+      - name: Enable AndroidX via shim 'cordova-plugin-androidx'
+        if: matrix.cordova.android.v == '8.0.0'
+        working-directory: ./testApp
+        run: cordova plugin add cordova-plugin-androidx
+
+      # cordova-android@9 requires opt-in to AndroidX via config preference.
       - name: Enable AndroidX
-        if: matrix.androidX
+        if: matrix.cordova.android.v == '9.0.0'
         run: |
           npm run cordova-preference -- ./testApp AndroidXEnabled true
-      
-      - name: Add AndroidX shim
-        if: matrix.androidX
-        working-directory: ./testApp
-        run: cordova plugin add cordova-plugin-androidx-adapter
 
       - name: cordova plugin add
         working-directory: ./testApp
         run: cordova plugin add ${{ github.workspace }}/plugin
 
-      - name: cordova platform add android
+      - name: cordova platform add android@${{ matrix.cordova.android.v }}
         working-directory: ./testApp
-        run: cordova platform add android
+        run: cordova platform add android@${{ matrix.cordova.android.v }}
+
+      # Android SDK Build tools throws error: Build-tool 32.0.0 is missing DX
+      # https://stackoverflow.com/questions/68397703/installed-build-tools-revision-31-0-0-is-corrupted-remove-and-install-again-usi
+      - name: Patch Build Tools (Linux)
+        if: (matrix.cordova.android.v == '9.0.0' || matrix.cordova.android.v == '10.0.0') && matrix.os == 'ubuntu-latest'
+        run: |
+          cd $ANDROID_SDK_ROOT/build-tools/32.0.0
+          mv d8 dx
+          mv ./lib/d8.jar ./lib/dx.jar
+
+      - name: Patch Build Tools (Windows)
+        if: (matrix.cordova.android.v == '9.0.0' || matrix.cordova.android.v == '10.0.0') && matrix.os == 'windows-latest'
+        env:
+          BUILD_TOOLS: build-tools\32.0.0
+        run: |
+          ren $env:ANDROID_SDK_ROOT\$env:BUILD_TOOLS\d8.bat $env:ANDROID_SDK_ROOT\$env:BUILD_TOOLS\dx.bat
+          ren $env:ANDROID_SDK_ROOT\$env:BUILD_TOOLS\lib\d8.jar $env:ANDROID_SDK_ROOT\$env:BUILD_TOOLS\lib\dx.jar
 
       - name: cordova build
         working-directory: ./testApp
