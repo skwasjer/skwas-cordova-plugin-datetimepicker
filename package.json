@@ -41,10 +41,10 @@
     "masimplo"
   ],
   "devDependencies": {
-    "@cordova/eslint-config": "^3.0.0",
+    "@cordova/eslint-config": "^4.0.0",
     "eslint": "^7.24.0",
     "eslint-plugin-es": "^4.1.0",
-    "jasmine": "^3.7.0",
+    "jasmine": "^3.10.0",
     "mock-require": "^3.0.3",
     "nyc": "^15.1.0",
     "xmldom": "^0.6.0",
