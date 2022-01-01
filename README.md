@@ -102,9 +102,19 @@ For a list of all changes  [see here](./CHANGELOG.md).
 
 ## Build requirements
 
-- Cordova 7 or higher
+- Cordova 8 or higher
+- Android:
+  - Android SDK
+  - AndroidX support must be enabled:
+    - `cordova-android@8.0.0`  
+      Requires additional plugin [`cordova-plugin-androidx`](https://www.npmjs.com/package/cordova-plugin-androidx).
+    - `cordova-android@9.0.0`  
+      Requires `<preference name="AndroidXEnabled" value="true" />` to be added to `config.xml`.
+    - `cordova-android@10.0.0`  
+      AndroidX is enabled by default.
 - Xcode 11 or higher (iOS)
-- Node 12.22.x or higher
+  - &gt;= `cordova-ios@5.1.1`
+- Node 10.x or higher
 
 ### Contributors
 
