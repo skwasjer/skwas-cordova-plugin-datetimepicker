@@ -10,7 +10,6 @@ jobs:
       matrix:
         node-version:
           - 10.x
-          - 12.x
           - 14.x
         os:
           - macos-latest
@@ -144,7 +143,6 @@ jobs:
       matrix:
         node-version:
           - 10.x
-          - 12.x
           - 14.x
         os:
           - ubuntu-latest
