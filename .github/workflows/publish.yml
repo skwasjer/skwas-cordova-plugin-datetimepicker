@@ -1,0 +1,35 @@
+name: Publish
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  publish:
+    name: Publish NPM release
+    runs-on: ubuntu-latest
+    environment: Production
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Install NodeJS
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: npm install and test
+        run: npm cit
+        env:
+          CI: true
+
+      - name: prepare publish
+        run: echo //registry.npmjs.org/:_authToken=$\{NPM_TOKEN\} > .npmrc
+
+      - name: npm publish
+        run: npm publish
+        env:
+          CI: true
+          NPM_TOKEN: ${{ secrets.NPM_PUB_TOKEN }}

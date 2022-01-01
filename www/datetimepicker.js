@@ -21,14 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-var utils = require('skwas-cordova-plugin-datetimepicker.utils'),
-	exec = require('cordova/exec');
+var utils = require("skwas-cordova-plugin-datetimepicker.utils");
+var exec = require("cordova/exec");
 
 /**
  * This represents the DateTimePicker, and provides methods to show the native DateTime picker.
  * @constructor
  */
-function DateTimePicker() {
+function DateTimePicker () {
 }
 
 /**
@@ -36,100 +36,100 @@ function DateTimePicker() {
  *
  * @param {Function} successCallback The function to call when the datetime has changed.
  */
-DateTimePicker.prototype.show = function(options, successCallback, errorCallback) {
-	var settings = {
-		mode: "date",
-		date: new Date(),
-		minDate: null,
-		maxDate: null,
-		allowOldDates: null,
-		allowFutureDates: null,
-		minuteInterval: 1,
-		locale: null,
-		okText: null,
-		cancelText: null,
-		clearText: null,
-		titleText: null,
-		android: {
-			theme: undefined,	// If omitted/undefined, default theme will be used.
-			calendar: false
-		},
-		success: undefined,
-		cancel: undefined,
-		error: undefined
-	};
+DateTimePicker.prototype.show = function (options, successCallback, errorCallback) {
+    if (!utils.isObject(options)) {
+        throw new Error("'options' is required.");
+    }
 
-	// Copy options into settings overwriting the defaults.
-	for (var key in settings) {
-		if (utils.isDefined(options[key])) {
-			settings[key] = options[key];
-		}
-	}
+    var settings = {
+        mode: "date",
+        date: new Date(),
+        minDate: null,
+        maxDate: null,
+        allowOldDates: null,
+        allowFutureDates: null,
+        minuteInterval: 1,
+        locale: null,
+        okText: null,
+        cancelText: null,
+        clearText: null,
+        titleText: null,
+        android: {
+            // If omitted/undefined, default theme will be used.
+            theme: undefined,
+            calendar: false
+        },
+        success: undefined,
+        cancel: undefined,
+        error: undefined
+    };
 
-	// Backward compat for callbacks.
-	if (!utils.isFunction(settings.success)) {
-		settings.success = successCallback;
-	}
-	if (!utils.isFunction(settings.error)) {
-		settings.error = errorCallback;
-	}
+    // Copy options into settings overwriting the defaults.
+    for (var key in settings) {
+        if (utils.isDefined(options[key])) {
+            settings[key] = options[key];
+        }
+    }
 
-	var onPluginError = utils.getErrorHandler(settings.error).bind(this),
-		onPluginSuccess = function(result) {
-			// The success handler expects the result to be:
-			//
-			// {
-			//    "ticks": a 64-bit int (ticks),
-			//    "cancelled": true|false
-			// }
-			console.debug("DateTimePickerPlugin: Exec 'show' returned:", result);
-			if (utils.isDefined(result) && utils.isObject(result) && result !== null) {
-				if (result.cancelled === true) {
-					utils.isFunction(settings.cancel) && settings.cancel.apply(this);
-				} else if (utils.isNumber(result.ticks)) {
-					var resultDate = new Date(result.ticks);
-					utils.isFunction(settings.success) && settings.success.apply(this, [ resultDate ]);
-				}
-				else {
-					utils.isFunction(settings.success) && settings.success.apply(this, []);
-				}
-				return;
-			}
+    // Backward compat for callbacks.
+    if (!utils.isFunction(settings.success)) {
+        settings.success = successCallback;
+    }
+    if (!utils.isFunction(settings.error)) {
+        settings.error = errorCallback;
+    }
 
-			onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
-		}.bind(this);
+    var onPluginError = utils.getErrorHandler(settings.error).bind(this);
+    var onPluginSuccess = function (result) {
+        // The success handler expects the result to be:
+        //
+        // {
+        //    "ticks": a 64-bit int (ticks),
+        //    "cancelled": true|false
+        // }
+        console.debug("DateTimePickerPlugin: Exec 'show' returned:", result);
+        if (utils.isDefined(result) && utils.isObject(result) && result !== null) {
+            if (result.cancelled === true) {
+                utils.isFunction(settings.cancel) && settings.cancel.apply(this);
+            } else if (utils.isNumber(result.ticks)) {
+                var resultDate = new Date(result.ticks);
+                utils.isFunction(settings.success) && settings.success.apply(this, [resultDate]);
+            } else {
+                utils.isFunction(settings.success) && settings.success.apply(this, []);
+            }
+            return;
+        }
 
-	// Validate/sanitize options.
-	try {
-		if (utils.validate(utils.isValidMode, settings, "mode", "Expected a String: date, time, datetime.")) {
-			settings.mode = settings.mode.toLowerCase();
-		};
+        onPluginError("Unexpected result from plugin: " + JSON.stringify(arguments));
+    }.bind(this);
 
-		// Validate if dates are valid, convert to ticks since epoch.
-		if (utils.validate(utils.isDate, settings, "date", "Expected a Date.")) {
-			settings.ticks = settings.date.valueOf();
-		}
-		if (!!settings.minDate && utils.validate(utils.isDate, settings, "minDate", "Expected a Date.")) {
-			settings.minDateTicks = settings.minDate.valueOf();
-		}
-		if (!!settings.maxDate && utils.validate(utils.isDate, settings, "maxDate", "Expected a Date.")) {
-			settings.maxDateTicks = settings.maxDate.valueOf();
-		}
+    // Validate/sanitize options.
+    try {
+        if (utils.validate(utils.isValidMode, settings, "mode", "Expected a String: date, time, datetime.")) {
+            settings.mode = settings.mode.toLowerCase();
+        }
 
-		if (!!settings.minuteInterval && utils.validate(utils.isMinuteInterval, settings, "minuteInterval", "Expected a Number which is a divisor of 60 (min 1, max 30).")) {
-			settings.minuteInterval = parseInt(settings.minuteInterval);
-		}
+        // Validate if dates are valid, convert to ticks since epoch.
+        if (utils.validate(utils.isDate, settings, "date", "Expected a Date.")) {
+            settings.ticks = settings.date.valueOf();
+        }
+        if (!!settings.minDate && utils.validate(utils.isDate, settings, "minDate", "Expected a Date.")) {
+            settings.minDateTicks = settings.minDate.valueOf();
+        }
+        if (!!settings.maxDate && utils.validate(utils.isDate, settings, "maxDate", "Expected a Date.")) {
+            settings.maxDateTicks = settings.maxDate.valueOf();
+        }
 
-		if (cordova.platformId !== "android") {
-			delete settings.android;
-		}
-	} catch (e) {
-		onPluginError(e.message);
-		return;
-	}
+        if (!!settings.minuteInterval && utils.validate(utils.isMinuteInterval, settings, "minuteInterval", "Expected a Number which is a divisor of 60 (min 1, max 30).")) {
+            settings.minuteInterval = parseInt(settings.minuteInterval);
+        }
+    } catch (e) {
+        onPluginError(e.message);
+        return;
+    }
 
-	console.debug("DateTimePickerPlugin: Exec 'show' with:", settings);
-	exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [ settings ]);
+    console.debug("DateTimePickerPlugin: Exec 'show' with:", settings);
+    exec(onPluginSuccess, onPluginError, "DateTimePicker", "show", [settings]);
 };
 
 /**
@@ -138,9 +138,9 @@ DateTimePicker.prototype.show = function(options, successCallback, errorCallback
  * If the picker is currently being shown and a cancel-callback was provided
  * in the options, the callback will be called when the picker is hidden.
  */
-DateTimePicker.prototype.hide = function() {
-	console.debug("DateTimePickerPlugin: Exec 'hide'.");
-	exec(null, utils.getErrorHandler().bind(this), "DateTimePicker", "hide");
-}
+DateTimePicker.prototype.hide = function () {
+    console.debug("DateTimePickerPlugin: Exec 'hide'.");
+    exec(null, utils.getErrorHandler().bind(this), "DateTimePicker", "hide");
+};
 
 module.exports = new DateTimePicker();

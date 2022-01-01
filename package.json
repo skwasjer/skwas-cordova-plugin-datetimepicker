@@ -1,5 +1,5 @@
 {
-  "version": "2.1.2",
+  "version": "3.0.0",
   "name": "skwas-cordova-plugin-datetimepicker",
   "cordova_name": "DateTime picker",
   "description": "Cordova DateTime picker plugin",
@@ -18,16 +18,42 @@
     "datepicker",
     "timepicker"
   ],
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "npm run coverage",
+    "test:unit": "jasmine --config=./tests/specs/jasmine.json",
+    "coverage": "nyc --check-coverage jasmine --config=./tests/specs/jasmine.json",
+    "cordova-preference": "node ./ci/cordova-preference.js"
+  },
   "platforms": [
     "android",
     "ios"
   ],
-  "engines": [],
+  "engines": {
+    "node": ">=10"
+  },
   "license": "MIT",
   "author": "skwasjer",
   "contributors": [
     "turshija",
     "emanfu",
     "masimplo"
-  ]
+  ],
+  "devDependencies": {
+    "@cordova/eslint-config": "^4.0.0",
+    "eslint": "^7.24.0",
+    "eslint-plugin-es": "^4.1.0",
+    "jasmine": "^3.10.0",
+    "mock-require": "^3.0.3",
+    "nyc": "^15.1.0",
+    "xmldom": "^0.6.0",
+    "xpath": "0.0.32"
+  },
+  "nyc": {
+    "reporter": [
+      "lcov",
+      "text"
+    ]
+  }
 }
