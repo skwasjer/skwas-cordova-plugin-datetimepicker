@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0",
+  "version": "3.0.1",
   "name": "skwas-cordova-plugin-datetimepicker",
   "cordova_name": "DateTime picker",
   "description": "Cordova DateTime picker plugin",
@@ -17,6 +17,12 @@
     "datetimepicker",
     "datepicker",
     "timepicker"
+  ],
+  "files": [
+    "src",
+    "types/index.d.ts",
+    "www",
+    "plugin.xml"
   ],
   "scripts": {
     "lint": "eslint .",

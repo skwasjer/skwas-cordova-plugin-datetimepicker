@@ -3,6 +3,10 @@
 
 Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
+## 3.0.1
+
+- Removed unnecessary artifacts from npm release package, making the package smaller.
+
 ## 3.0.0
 
 - Android: use annotations/decorators from AndroidX
