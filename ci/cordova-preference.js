@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const xpath = require("xpath");
-const DOMParser = require("xmldom").DOMParser;
+const DOMParser = require("@xmldom/xmldom").DOMParser;
 
 if (process.argv.length !== 5) {
     throw new Error("Expected path, preference key and value.");
