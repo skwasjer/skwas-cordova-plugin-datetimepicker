@@ -140,9 +140,9 @@ describe("show", () => {
 
         describe("with non-sanitized options", () => {
             it("should call cordova exec with sanitized options", () => {
-                var dt = new Date(2020, 1, 2, 3, 4, 5);
-                var dtMin = new Date(2019, 1, 2, 3, 4, 5);
-                var dtMax = new Date(2021, 1, 2, 3, 4, 5);
+                const dt = new Date(2020, 1, 2, 3, 4, 5);
+                const dtMin = new Date(2019, 1, 2, 3, 4, 5);
+                const dtMax = new Date(2021, 1, 2, 3, 4, 5);
 
                 // Act
                 dateTimePicker.show({
@@ -204,7 +204,7 @@ describe("show", () => {
 
         describe("given that user closes picker with OK button", () => {
             it("should call success callback with expected value", () => {
-                var dt = new Date();
+                const dt = new Date();
                 execSpy.and.callFake(function (success) {
                     success({ ticks: dt.valueOf() });
                 });

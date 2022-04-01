@@ -4,6 +4,7 @@ extends:
 
 plugins:
   - es
+  - es5
 
 parserOptions:
   ecmaFeatures:
@@ -21,10 +22,11 @@ overrides:
       - www/**/*.js
     extends:
       # ES5
-      - "plugin:es/no-new-in-es2015"
+      - "plugin:es5/no-es2015"
       - "@cordova/eslint-config/browser"
     rules:
       quotes: ["error", "double"]
+      no-var: 0
 
 rules:
   quotes: ["error", "double"]

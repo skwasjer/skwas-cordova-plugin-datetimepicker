@@ -20,11 +20,11 @@ if (nodes.length) {
     nodes[0].value = preferenceValue;
 } else {
     // Add elem
-    var prefElem = doc.createElement("preference");
-    var nameAttr = doc.createAttribute("name");
+    const prefElem = doc.createElement("preference");
+    const nameAttr = doc.createAttribute("name");
     nameAttr.value = preference;
     prefElem.setAttributeNode(nameAttr);
-    var valueAttr = doc.createAttribute("value");
+    const valueAttr = doc.createAttribute("value");
     valueAttr.value = preferenceValue;
     prefElem.setAttributeNode(valueAttr);
     doc.documentElement.appendChild(prefElem);
