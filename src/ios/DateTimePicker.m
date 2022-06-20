@@ -99,6 +99,7 @@
     // Prefer wheels style on iOS 14.
     if (@available(iOS 13.4, *)) {
         datePicker.preferredDatePickerStyle = UIDatePickerStyleWheels;
+        [datePicker addTarget:self action:@selector(handleDatePickerTap:) forControlEvents:UIControlEventEditingDidBegin];
     }
     
     // Mode (must be set first, otherwise minuteInterval > 1 acts wonky).
@@ -172,6 +173,10 @@
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:_callbackId];
+}
+
+- (void)handleDatePickerTap:(id)sender{
+  [sender resignFirstResponder];
 }
 
 @end
