@@ -76,6 +76,10 @@
     picker.modalPresentationStyle = UIModalPresentationCustom;
     picker.transitioningDelegate = self;
 
+    if (@available(iOS 13.4, *)) {
+        [picker.datePicker addTarget:self action:@selector(handleDatePickerTap:) forControlEvents:UIControlEventEditingDidBegin];
+    }
+
     picker.doneHandler = ^(id sender) {
         ModalPickerViewController *modelPicker = (ModalPickerViewController *)sender;
         if (modelPicker == nil) {
@@ -99,7 +103,6 @@
     // Prefer wheels style on iOS 14.
     if (@available(iOS 13.4, *)) {
         datePicker.preferredDatePickerStyle = UIDatePickerStyleWheels;
-        [datePicker addTarget:self action:@selector(handleDatePickerTap:) forControlEvents:UIControlEventEditingDidBegin];
     }
     
     // Mode (must be set first, otherwise minuteInterval > 1 acts wonky).
