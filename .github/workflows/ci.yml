@@ -124,12 +124,12 @@ jobs:
         working-directory: ./testApp
         run: cordova platform add android@${{ matrix.cordova.android.v }}
 
-      # Android SDK Build tools throws error: Build-tool 32.0.0 is missing DX
+      # Android SDK Build tools throws error: Build-tool 33.0.0 is missing DX
       # https://stackoverflow.com/questions/68397703/installed-build-tools-revision-31-0-0-is-corrupted-remove-and-install-again-usi
       - name: Patch Build Tools
         if: matrix.cordova.android.v != '8.0.0'
         run: |
-          cd $ANDROID_SDK_ROOT/build-tools/32.0.0
+          cd $ANDROID_SDK_ROOT/build-tools/33.0.0
           mv d8 dx
           cd lib
           mv d8.jar dx.jar
@@ -255,19 +255,19 @@ jobs:
         working-directory: ./testApp
         run: cordova platform add android@${{ matrix.cordova.android.v }}
 
-      # Android SDK Build tools throws error: Build-tool 32.0.0 is missing DX
+      # Android SDK Build tools throws error: Build-tool 33.0.0 is missing DX
       # https://stackoverflow.com/questions/68397703/installed-build-tools-revision-31-0-0-is-corrupted-remove-and-install-again-usi
       - name: Patch Build Tools (Linux)
         if: (matrix.cordova.android.v == '9.0.0' || matrix.cordova.android.v == '10.0.0') && matrix.os == 'ubuntu-latest'
         run: |
-          cd $ANDROID_SDK_ROOT/build-tools/32.0.0
+          cd $ANDROID_SDK_ROOT/build-tools/33.0.0
           mv d8 dx
           mv ./lib/d8.jar ./lib/dx.jar
 
       - name: Patch Build Tools (Windows)
         if: (matrix.cordova.android.v == '9.0.0' || matrix.cordova.android.v == '10.0.0') && matrix.os == 'windows-latest'
         env:
-          BUILD_TOOLS: build-tools\32.0.0
+          BUILD_TOOLS: build-tools\33.0.0
         run: |
           ren $env:ANDROID_SDK_ROOT\$env:BUILD_TOOLS\d8.bat $env:ANDROID_SDK_ROOT\$env:BUILD_TOOLS\dx.bat
           ren $env:ANDROID_SDK_ROOT\$env:BUILD_TOOLS\lib\d8.jar $env:ANDROID_SDK_ROOT\$env:BUILD_TOOLS\lib\dx.jar
