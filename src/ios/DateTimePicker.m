@@ -76,6 +76,10 @@
     picker.modalPresentationStyle = UIModalPresentationCustom;
     picker.transitioningDelegate = self;
 
+    if (@available(iOS 13.4, *)) {
+        [picker.datePicker addTarget:self action:@selector(handleDatePickerTap:) forControlEvents:UIControlEventEditingDidBegin];
+    }
+
     picker.doneHandler = ^(id sender) {
         ModalPickerViewController *modelPicker = (ModalPickerViewController *)sender;
         if (modelPicker == nil) {
@@ -172,6 +176,10 @@
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:_callbackId];
+}
+
+- (void)handleDatePickerTap:(id)sender{
+  [sender resignFirstResponder];
 }
 
 @end
