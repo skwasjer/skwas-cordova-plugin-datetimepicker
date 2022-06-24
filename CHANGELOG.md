@@ -3,6 +3,10 @@
 
 Changelog for [skwas-cordova-plugin-datetimepicker](./README.md).
 
+## 3.0.2
+
+- iOS: Hide keyboard input when clicking on ios current datetime entry (#60)
+
 ## 3.0.1
 
 - Removed unnecessary artifacts from npm release package, making the package smaller.
