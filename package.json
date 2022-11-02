@@ -49,10 +49,11 @@
   "devDependencies": {
     "@cordova/eslint-config": "^4.0.0",
     "@xmldom/xmldom": "^0.8.5",
-    "eslint": "^7.24.0",
+    "eslint": "^8.26.0",
     "eslint-plugin-es": "^4.1.0",
     "eslint-plugin-es5": "^1.5.0",
-    "jasmine": "^3.10.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "jasmine": "^4.5.0",
     "mock-require": "^3.0.3",
     "nyc": "^15.1.0",
     "xpath": "0.0.32"
