@@ -26,6 +26,7 @@ jobs:
             android:
               v: '7.1.4'
               minSdk: 19
+              shim: true
           - v: '9.0.0'
             ios:
               v: '6.2.0'
@@ -106,7 +107,7 @@ jobs:
 
       # cordova-android@8 requires shim to enable AndroidX.
       - name: Enable AndroidX via shim 'cordova-plugin-androidx'
-        if: matrix.cordova.android.v == '8.0.0'
+        if: matrix.cordova.android.shim
         working-directory: ./testApp
         run: cordova plugin add cordova-plugin-androidx
 
@@ -127,7 +128,7 @@ jobs:
       # Android SDK Build tools throws error: Build-tool 33.0.0 is missing DX
       # https://stackoverflow.com/questions/68397703/installed-build-tools-revision-31-0-0-is-corrupted-remove-and-install-again-usi
       - name: Patch Build Tools
-        if: matrix.cordova.android.v != '8.0.0'
+        if: matrix.cordova.android.v == '9.0.0' || matrix.cordova.android.v == '10.0.0'
         run: |
           cd $ANDROID_SDK_ROOT/build-tools/33.0.0
           mv d8 dx
@@ -158,10 +159,12 @@ jobs:
             android:
               v: '7.1.4'
               minSdk: 19
+              shim: true
           - v: '9.0.0'
             android:
               v: '8.0.0'
               minSdk: 19
+              shim: true
           - v: '9.0.0'
             android:
               v: '9.0.0'
@@ -237,7 +240,7 @@ jobs:
 
       # cordova-android@8 requires shim to enable AndroidX.
       - name: Enable AndroidX via shim 'cordova-plugin-androidx'
-        if: matrix.cordova.android.v == '8.0.0'
+        if: matrix.cordova.android.shim
         working-directory: ./testApp
         run: cordova plugin add cordova-plugin-androidx
 
