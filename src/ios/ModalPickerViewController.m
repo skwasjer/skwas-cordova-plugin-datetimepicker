@@ -20,7 +20,7 @@ static const float kDatePickerHeight = 200;
     UIBarButtonItem *_cancelButton;
 
     NSLayoutConstraint *_navBarHeight;
-    
+
     UIColor *lightBackgroundColor;
     UIColor *lightDatePickerBackgroundColor;
     UIColor *lightButtonLabelColor;
@@ -39,10 +39,10 @@ static const float kDatePickerHeight = 200;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     self.view.backgroundColor = [UIColor clearColor];
     self.view.opaque = NO;
-    
+
     [self createSwatches];
     [self createControls];
 }
@@ -56,21 +56,21 @@ static const float kDatePickerHeight = 200;
         _navigationBar = nil;
         _navigationItem = nil;
         _internalView = nil;
-    
+
         _doneButton = nil;
         _clearButton = nil;
         _cancelButton = nil;
-        
+
         lightBackgroundColor = nil;
         darkBackgroundColor = nil;
         lightDatePickerBackgroundColor = nil;
         darkDatePickerBackgroundColor = nil;
         lightButtonLabelColor = nil;
         darkButtonLabelColor = nil;
-        
+
         _navBarHeight = nil;
     }
-    
+
     [super didReceiveMemoryWarning];
 }
 
@@ -81,13 +81,13 @@ static const float kDatePickerHeight = 200;
         [self createSwatches];
         [self createControls];
     }
-    
+
     // Update texts.
     _navigationItem.title = _titleText;
 
     _doneButton.title = _doneText != (id)[NSNull null] && _doneText.length > 0 ? _doneText : UIKitLocalizedString(@"Done");
     _cancelButton.title = _cancelText != (id)[NSNull null] && _cancelText.length > 0 ? _cancelText : UIKitLocalizedString(@"Cancel");
-    
+
     // Show clear button when clear text is set
     if (_clearText != (id)[NSNull null] && _clearText.length > 0) {
         _clearButton.title = _clearText;
@@ -103,7 +103,7 @@ static const float kDatePickerHeight = 200;
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskAll;
+    return UIInterfaceOrientationMaskPortrait;
 }
 
 - (void)viewWillLayoutSubviews {
@@ -122,12 +122,12 @@ static const float kDatePickerHeight = 200;
     // Create a view that will host our controls.
     _internalView = [[UIView alloc] init];
     _internalView.opaque = FALSE;
-    
+
     // Nav bar
     _navigationBar = [[UINavigationBar alloc] init];
     _navigationBar.translucent = TRUE;
     _navigationBar.opaque = FALSE;
-    
+
     _navigationItem = [[UINavigationItem alloc] init];
     [_navigationBar setItems:@[_navigationItem]];
 
@@ -136,7 +136,7 @@ static const float kDatePickerHeight = 200;
     [_navigationItem setRightBarButtonItem:_doneButton animated:NO];
 
     _clearButton = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:@selector(clearButtonTapped:)];
-    
+
     // Left button
     _cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:self action:@selector(cancelButtonTapped:)];
     [_navigationItem setLeftBarButtonItem:_cancelButton animated:NO];
@@ -153,7 +153,7 @@ static const float kDatePickerHeight = 200;
     _internalView.translatesAutoresizingMaskIntoConstraints = FALSE;
     _datePicker.translatesAutoresizingMaskIntoConstraints = FALSE;
     _navigationBar.translatesAutoresizingMaskIntoConstraints = FALSE;
-        
+
     NSLayoutConstraint *viewWidth = [NSLayoutConstraint constraintWithItem:_internalView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1 constant:0];
     NSLayoutConstraint *viewHeight = [NSLayoutConstraint constraintWithItem:_internalView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:kHeaderBarHeight + kDatePickerHeight];
     NSLayoutConstraint *viewBottom = [NSLayoutConstraint constraintWithItem:_internalView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1 constant:0];
